@@ -12,6 +12,8 @@ python3.11 -m venv venv
 pip install -r kernel/requirements.txt # or pip install uv && uv pip install -r kernel/requirements.txt
 ```
 
+## Usage
+
 In Neptyne containers, you'd typically import the API using
 
 ```
