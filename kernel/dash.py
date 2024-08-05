@@ -489,29 +489,31 @@ class Dash:
         self._mutex_manager = MutexManager()
 
         parent = ip if isinstance(ip, InteractiveShell) else None
-        ip.InteractiveTB = DashAutoFormattedTB(
-            mode="Plain",
-            color_scheme="LightBG",
-            tb_offset=ip.InteractiveTB.tb_offset,
-            check_cache=ip.InteractiveTB.check_cache,
-            debugger_cls=ip.debugger_cls,
-            parent=parent,
-        )
-        ip.InteractiveTB.set_mode(mode="Context")
-        ip.SyntaxTB = DashSyntaxTB(color_scheme="LightBG", parent=parent)
 
-        ip.run_line_magic("matplotlib", "inline")
+        if ip is not None:
+            ip.InteractiveTB = DashAutoFormattedTB(
+                mode="Plain",
+                color_scheme="LightBG",
+                tb_offset=ip.InteractiveTB.tb_offset,
+                check_cache=ip.InteractiveTB.check_cache,
+                debugger_cls=ip.debugger_cls,
+                parent=parent,
+            )
+            ip.InteractiveTB.set_mode(mode="Context")
+            ip.SyntaxTB = DashSyntaxTB(color_scheme="LightBG", parent=parent)
 
-        ip.events.register("pre_execute", self.pre_execute)
-        ip.events.register("post_execute", self.post_execute)
-        ip.events.register("post_run_cell", self.post_run_cell)
+            ip.run_line_magic("matplotlib", "inline")
 
-        ip.__class__.compiler_class = TyneCachingCompiler
-        ip.compile = ip.compiler_class()
+            ip.events.register("pre_execute", self.pre_execute)
+            ip.events.register("post_execute", self.post_execute)
+            ip.events.register("post_run_cell", self.post_run_cell)
 
-        self.kernel = ip.kernel
+            ip.__class__.compiler_class = TyneCachingCompiler
+            ip.compile = ip.compiler_class()
 
-        self.patch_do_complete(self.kernel)
+            self.kernel = ip.kernel
+
+            self.patch_do_complete(self.kernel)
 
         self.message_publisher = Thread(
             name="msg-publisher", daemon=True, target=self.flush_loop
