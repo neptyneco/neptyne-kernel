@@ -1,6 +1,6 @@
 # The Neptyne Kernel
 
-This package contains everything shipped in a Neptyne kernel container. Running outside of a Neptyne context isnt fully supported yet, but this may prove useful for some advanced use cases.
+This package contains everything shipped in a [Neptyne](https://neptyne.com) kernel container. Running outside of a Neptyne context isnt fully supported yet, but this may prove useful for some advanced use cases.
 
 ## Installing
 
