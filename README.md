@@ -6,7 +6,7 @@ This package contains everything shipped in a [Neptyne](https://neptyne.com) ker
 
 Neptyne kernels use Python 3.11, so this is the only version currently supported.
 
-python```
+```python
 python3.11 -m venv venv
 . venv/bin/activate
 pip install -r kernel/requirements.txt # or pip install uv && uv pip install -r kernel/requirements.txt
