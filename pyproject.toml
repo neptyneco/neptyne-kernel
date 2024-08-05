@@ -1,0 +1,15 @@
+[project]
+name = "neptyne-kernel"
+version = "0.1.1"
+description = "The Neptyne kernel"
+readme = "README.md"
+authors = []
+requires-python = "==3.11"
+classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["dependencies"]
+[project.urls]
+Homepage = "https://neptyne.com"
+Documentation = "https://docs.neptyne.com"
+Repository = "https://github.com/neptyneco/neptyne-kernel.git"
+[tool.setuptools.dynamic]
+dependencies = { file = ["kernel/requirements.txt"] }
