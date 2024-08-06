@@ -59,7 +59,7 @@ VALID_WARNING_TYPES = {
 
 EXCLUDE_WARNINGS = {
     UndefinedName: lambda x: x in FORMULA_NAMES or x == "N_",
-    ImportStarUsed: lambda x: x == "kernel.kernel_init",
+    ImportStarUsed: lambda x: x == "neptyne_kernel.kernel_init",
 }
 
 

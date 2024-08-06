@@ -489,31 +489,29 @@ class Dash:
         self._mutex_manager = MutexManager()
 
         parent = ip if isinstance(ip, InteractiveShell) else None
+        ip.InteractiveTB = DashAutoFormattedTB(
+            mode="Plain",
+            color_scheme="LightBG",
+            tb_offset=ip.InteractiveTB.tb_offset,
+            check_cache=ip.InteractiveTB.check_cache,
+            debugger_cls=ip.debugger_cls,
+            parent=parent,
+        )
+        ip.InteractiveTB.set_mode(mode="Context")
+        ip.SyntaxTB = DashSyntaxTB(color_scheme="LightBG", parent=parent)
 
-        if ip is not None:
-            ip.InteractiveTB = DashAutoFormattedTB(
-                mode="Plain",
-                color_scheme="LightBG",
-                tb_offset=ip.InteractiveTB.tb_offset,
-                check_cache=ip.InteractiveTB.check_cache,
-                debugger_cls=ip.debugger_cls,
-                parent=parent,
-            )
-            ip.InteractiveTB.set_mode(mode="Context")
-            ip.SyntaxTB = DashSyntaxTB(color_scheme="LightBG", parent=parent)
+        ip.run_line_magic("matplotlib", "inline")
 
-            ip.run_line_magic("matplotlib", "inline")
+        ip.events.register("pre_execute", self.pre_execute)
+        ip.events.register("post_execute", self.post_execute)
+        ip.events.register("post_run_cell", self.post_run_cell)
 
-            ip.events.register("pre_execute", self.pre_execute)
-            ip.events.register("post_execute", self.post_execute)
-            ip.events.register("post_run_cell", self.post_run_cell)
+        ip.__class__.compiler_class = TyneCachingCompiler
+        ip.compile = ip.compiler_class()
 
-            ip.__class__.compiler_class = TyneCachingCompiler
-            ip.compile = ip.compiler_class()
+        self.kernel = ip.kernel
 
-            self.kernel = ip.kernel
-
-            self.patch_do_complete(self.kernel)
+        self.patch_do_complete(self.kernel)
 
         self.message_publisher = Thread(
             name="msg-publisher", daemon=True, target=self.flush_loop
@@ -928,7 +926,7 @@ class Dash:
             for line in (
                 "[server]",
                 f'baseUrlPath = "{self.streamlit_base_url_path}"',
-                'folderWatchBlacklist = ["**/kernel"]',
+                'folderWatchBlacklist = ["**/neptyne_kernel"]',
                 "enableXsrfProtection = false",
                 "enableCORS = false",
                 "headless = true",
@@ -2650,14 +2648,14 @@ class Dash:
                 setup_code = (
                     "\n".join(
                         (
-                            f"from {server_import_path_prefix}kernel.dash import Dash as _Dash",
-                            f"from {server_import_path_prefix}kernel.proxied_apis import start_api_proxying as _start_api_proxying",
+                            f"from {server_import_path_prefix}neptyne_kernel.dash import Dash as _Dash",
+                            f"from {server_import_path_prefix}neptyne_kernel.proxied_apis import start_api_proxying as _start_api_proxying",
                             "N_ = _Dash.instance()",
                             "_start_api_proxying()",
                             "if N_.in_gs_mode:",
-                            f"    from {server_import_path_prefix}kernel.kernel_globals.gsheets import *",
+                            f"    from {server_import_path_prefix}neptyne_kernel.kernel_globals.gsheets import *",
                             "else:",
-                            f"    from {server_import_path_prefix}kernel.kernel_globals.core import *",
+                            f"    from {server_import_path_prefix}neptyne_kernel.kernel_globals.core import *",
                         )
                     )
                     + "\n\n"

@@ -21,8 +21,8 @@ def determine_connection_file() -> str:
 
 def get_config_args() -> list[str]:
     return [
-        "--Session.packer=kernel.json_tools.json_packer",
-        "--IPKernelApp.kernel_class=kernel.neptyne_kernel.Kernel",
+        "--Session.packer=neptyne_kernel.json_tools.json_packer",
+        "--IPKernelApp.kernel_class=neptyne_kernel.kernel.Kernel",
         "--HistoryManager.enabled=False",
     ]
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         ],
         connection_file=connection_file,
         ip=ip,
-        exec_lines=["from kernel.kernel_init import *"],
+        exec_lines=["from neptyne_kernel.kernel_init import *"],
         log_level="DEBUG",
     )
 

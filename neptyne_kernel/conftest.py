@@ -8,8 +8,8 @@ from .dash import Dash
 @pytest.fixture
 def dash():
     with (
-        mock.patch("kernel.dash.get_ipython_mockable"),
-        mock.patch("kernel.kernel_runtime.get_ipython_mockable"),
+        mock.patch("neptyne_kernel.dash.get_ipython_mockable"),
+        mock.patch("neptyne_kernel.kernel_runtime.get_ipython_mockable"),
     ):
         Dash._instance = None
         dash = Dash(silent=True)

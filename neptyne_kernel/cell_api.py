@@ -289,7 +289,7 @@ class CellApiMixin:
         return self.ref.xy()
 
     def _get_event(self) -> CellEvent:
-        from kernel.kernel_runtime import get_user
+        from neptyne_kernel.kernel_runtime import get_user
 
         from .formulas.spreadsheet_datetime import SpreadsheetDateTime
 

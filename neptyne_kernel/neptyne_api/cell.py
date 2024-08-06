@@ -18,7 +18,7 @@ Set A1's background color
 A1.set_background_color('red')
 ```
 
-For more high level context see [Cell API Overview](/kernel/neptyne_api#cells)
+For more high level context see [Cell API Overview](/neptyne_kernel/neptyne_api#cells)
 """
 
 from ..cell_api import CellApiMixin

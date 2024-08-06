@@ -85,11 +85,11 @@
 #     result = insert_delete_reply_cell_type_from_dict(json.loads(json_string))
 #     result = cell_type_from_dict(json.loads(json_string))
 
-from enum import Enum
-from typing import List, Optional, Any, Union, Dict, TypeVar, Callable, Type, cast
 from datetime import datetime
-import dateutil.parser
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, cast
 
+import dateutil.parser
 
 T = TypeVar("T")
 EnumT = TypeVar("EnumT", bound=Enum)

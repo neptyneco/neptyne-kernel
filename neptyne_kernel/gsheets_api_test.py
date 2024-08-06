@@ -290,7 +290,7 @@ class MockGoogleSheetsService:
 def dash():
     prev = Dash._instance
     Dash._instance = None
-    with mock.patch("kernel.dash.get_ipython_mockable"):
+    with mock.patch("neptyne_kernel.dash.get_ipython_mockable"):
         d = Dash(True)
         d.in_gs_mode = True
         d.gsheets_spreadsheet_id = SPREADSHEET_ID

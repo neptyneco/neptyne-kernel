@@ -21,7 +21,7 @@ class Secrets:
         self.interactive = interactive
 
     def maybe_ask_for_secret(self, secret: str, help: str) -> str | None:
-        from kernel.kernel_runtime import get_kernel, in_gs_mode
+        from neptyne_kernel.kernel_runtime import get_kernel, in_gs_mode
 
         value = self.secrets.get(secret)
         if value:

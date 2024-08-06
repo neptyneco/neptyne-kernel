@@ -24,7 +24,7 @@ from .vectorize import vectorize_cells
 sheets = Dash.instance().sheets
 """The global sheets collection. Access with `nt.sheets`
 
-See [Sheet API](/kernel/neptyne_api#sheets) for more details."""
+See [Sheet API](/neptyne_kernel/neptyne_api#sheets) for more details."""
 named_ranges = Dash.instance().named_ranges
 
 

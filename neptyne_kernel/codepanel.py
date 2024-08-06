@@ -1,18 +1,18 @@
-from kernel.dash import Dash as _Dash
-from kernel.proxied_apis import start_api_proxying as _start_api_proxying
+from neptyne_kernel.dash import Dash as _Dash
+from neptyne_kernel.proxied_apis import start_api_proxying as _start_api_proxying
+
 N_ = _Dash.instance()
 _start_api_proxying()
 if N_.in_gs_mode:
-    from kernel.kernel_globals.gsheets import *
+    from neptyne_kernel.kernel_globals.gsheets import *
 else:
-    from kernel.kernel_globals.core import *
-
-import neptyne as nt
-import streamlit as st
+    from neptyne_kernel.kernel_globals.core import *
 
 import random
 from datetime import date
 
+import neptyne as nt
+import streamlit as st
 
 
 @nt.streamlit(
@@ -38,7 +38,7 @@ def random_date():
 
 
 def random_str():
-    return ''.join([chr(ord("a") + random.randint(0, 25)) for _ in range(4)])
+    return "".join([chr(ord("a") + random.randint(0, 25)) for _ in range(4)])
 
 
 def random_row():
@@ -73,5 +73,6 @@ def test_rows():
         test_insert_zero(N_[4, 6, 0, -1, 0])
         test_insert_end(N_[8, 10, 0, -1, 0])
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app()

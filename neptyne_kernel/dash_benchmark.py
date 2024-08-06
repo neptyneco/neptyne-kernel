@@ -22,5 +22,5 @@ def benchmark_dash(dash):
 
 
 if __name__ == "__main__":
-    with mock.patch("kernel.dash.get_ipython_mockable") as mock_get_ipython:
+    with mock.patch("neptyne_kernel.dash.get_ipython_mockable") as mock_get_ipython:
         benchmark_dash(Dash(silent=True))

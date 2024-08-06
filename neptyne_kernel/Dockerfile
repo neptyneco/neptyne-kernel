@@ -21,7 +21,7 @@ RUN mkdir /secrets
 
 COPY --from=build-wheels /opt/venv /opt/venv
 
-RUN mkdir /kernel && touch /kernel/codepanel.py
+RUN mkdir /neptyne_kernel && touch /neptyne_kernel/codepanel.py
 RUN mkdir /.streamlit && touch /.streamlit/config.toml
 
 COPY requirements.txt ./

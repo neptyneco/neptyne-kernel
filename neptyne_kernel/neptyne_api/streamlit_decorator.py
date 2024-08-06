@@ -30,7 +30,7 @@ def streamlit(
         st.write("Hello World!")
     ```
 
-    For more information on Neptyne's streamlit integration, see the [Streamlit API](/kernel/neptyne_api#streamlit) documentation.
+    For more information on Neptyne's streamlit integration, see the [Streamlit API](/neptyne_kernel/neptyne_api#streamlit) documentation.
     """
     if fn is None:
         return lambda f: streamlit(

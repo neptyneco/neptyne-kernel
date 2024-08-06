@@ -5,8 +5,8 @@ from ..dash_ref import DashRef
 from .input_widgets import Button, Dropdown
 
 
-@mock.patch("kernel.kernel_runtime.get_ipython_mockable", mock.MagicMock())
-@mock.patch("kernel.dash.get_ipython_mockable", mock.MagicMock())
+@mock.patch("neptyne_kernel.kernel_runtime.get_ipython_mockable", mock.MagicMock())
+@mock.patch("neptyne_kernel.dash.get_ipython_mockable", mock.MagicMock())
 def test_button(dash):
     def trigger_action_using_button(action):
         button = Button(action.__name__, action=action)
@@ -26,8 +26,8 @@ def test_button(dash):
     assert action_with_event.event.cell.xy == (0, 0)
 
 
-@mock.patch("kernel.kernel_runtime.get_ipython_mockable", mock.MagicMock())
-@mock.patch("kernel.dash.get_ipython_mockable", mock.MagicMock())
+@mock.patch("neptyne_kernel.kernel_runtime.get_ipython_mockable", mock.MagicMock())
+@mock.patch("neptyne_kernel.dash.get_ipython_mockable", mock.MagicMock())
 def test_dropdown(dash):
     def action():
         action.clicked = True
