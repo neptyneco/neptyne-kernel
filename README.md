@@ -9,7 +9,7 @@ Neptyne kernels use Python 3.11, so this is the only version currently supported
 ```python
 python3.11 -m venv venv
 . venv/bin/activate
-pip install -r kernel/requirements.txt # or pip install uv && uv pip install -r kernel/requirements.txt
+pip install -r neptyne_kernel/requirements.txt # or pip install uv && uv pip install -r neptyne_kernel/requirements.txt
 ```
 
 ## Usage
@@ -23,5 +23,5 @@ import neptyne as nt
 Outside of this context, you'll need to do something like
 
 ```
-import kernel.neptyne_api as nt
+import neptyne_kernel.neptyne_api as nt
 ```
