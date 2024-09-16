@@ -38,6 +38,7 @@ if __name__ == "__main__":
     parser.add_argument("--stdin-port", type=int, default=STDIN_PORT)
     parser.add_argument("--hb-port", type=int, default=HB_PORT)
     parser.add_argument("--control-port", type=int, default=CONTROL_PORT)
+    parser.add_argument("--quiet", action="store_true")
 
     arguments = parser.parse_args()
     key = arguments.key
@@ -61,8 +62,7 @@ if __name__ == "__main__":
         ],
         connection_file=connection_file,
         ip=ip,
-        exec_lines=["from neptyne_kernel.kernel_init import *"],
-        log_level="DEBUG",
+        log_level="DEBUG" if not arguments.quiet else "WARN",
     )
 
     try:

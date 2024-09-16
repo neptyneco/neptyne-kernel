@@ -10,7 +10,7 @@ __all__ = ["IMAGE"]
 
 from xml.etree.ElementTree import XMLParser
 
-from ..mime_handling import SVG_MIME_KEY
+from ..mime_types import SVG_MIME_KEY
 from .spreadsheet_error import VALUE_ERROR
 
 XML_OPEN = b"<?xml"

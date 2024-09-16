@@ -6,7 +6,11 @@ import os
 from collections.abc import Mapping
 from typing import Any, Callable, Iterator, Sequence
 
+import google.auth.credentials
+import google.auth.transport
+import google_auth_httplib2
 import httplib2
+import jwt
 import numpy as np
 import pandas as pd
 from googleapiclient.discovery import Resource
@@ -71,7 +75,11 @@ def execute(to_execute: HttpRequest) -> dict[str, Any]:
         finally:
             kernel.shell.set_parent(parent)
 
+        if future.exception():
+            raise future.exception() from None  # type: ignore
+
         return future.result()
+
     return do_execute(to_execute)
 
 
@@ -90,6 +98,34 @@ class Formula:
         self.value = value
 
 
+class Credentials(google.auth.credentials.Credentials):
+    def refresh(self, request: google.auth.transport.Request) -> None:
+        if not os.getenv("NEPTYNE_LOCAL_REPL"):
+            return
+
+        from .dash import Dash
+
+        api_token, gsheet_id = Dash.instance().get_api_token()
+        claims = jwt.decode(api_token, options={"verify_signature": False})
+        self.token = api_token
+        self.expiry = datetime.datetime.fromtimestamp(
+            claims["exp"], datetime.timezone.utc
+        ).replace(tzinfo=None)
+
+    def apply(self, headers: dict, token: str | None = None) -> None:
+        from .dash import Dash
+
+        if not os.getenv("NEPTYNE_LOCAL_REPL"):
+            token = (
+                Dash.instance().api_token_override
+                if Dash.instance().api_token_override
+                else get_api_token()
+            )
+        if token is None:
+            token = self.token
+        headers[TOKEN_HEADER_NAME] = token
+
+
 class ProxiedHttp(httplib2.Http):
     def request(
         self,
@@ -100,20 +136,8 @@ class ProxiedHttp(httplib2.Http):
         redirections: int | None = 5,
         connection_type: type | None = None,
     ) -> tuple[httplib2.Response, bytes]:
-        from .dash import Dash
-
         if uri.startswith("https://sheets.googleapis.com"):
             host_port = os.getenv("API_PROXY_HOST_PORT", "localhost:8888")
-            headers = headers or {}
-            token = (
-                Dash.instance().api_token_override
-                if Dash.instance().api_token_override
-                else get_api_token()
-            )
-            if token is None:
-                raise ValueError("No API token found")
-
-            headers[TOKEN_HEADER_NAME] = token
             uri = uri.replace(
                 "https://sheets.googleapis.com",
                 f"http://{host_port}/google_sheets_api",
@@ -123,12 +147,15 @@ class ProxiedHttp(httplib2.Http):
         return res
 
 
-def build_request(_http: httplib2.Http, *args: Any, **kwargs: Any) -> HttpRequest:
-    """A thread-safe alternative to the default google-api-client behavior.
+def request_builder(credentials: Credentials) -> Callable[..., HttpRequest]:
+    def build_request(_http: httplib2.Http, *args: Any, **kwargs: Any) -> HttpRequest:
+        """A thread-safe alternative to the default google-api-client behavior.
 
-    See https://googleapis.github.io/google-api-python-client/docs/thread_safety.html"""
-    new_http = ProxiedHttp()
-    return HttpRequest(new_http, *args, **kwargs)
+        See https://googleapis.github.io/google-api-python-client/docs/thread_safety.html"""
+        new_http = google_auth_httplib2.AuthorizedHttp(credentials, http=ProxiedHttp())
+        return HttpRequest(new_http, *args, **kwargs)
+
+    return build_request
 
 
 def cell_to_value(cell: Cell) -> float | str | int | None:
@@ -284,6 +311,8 @@ def get_item(
             min_col = as_range.min_col
             max_row = as_range.max_row
             max_col = as_range.max_col
+        elif not values:
+            max_row = max_col = -1
         else:
             max_row = len(values)
             max_col = len(values[0]) if max_row else 0
@@ -897,6 +926,18 @@ class GSheetRef(ApiRef):
             values=values,
         )
 
+    def with_value(self, address: Address, value: Any) -> "CellApiMixin":
+        return proxy_val(
+            value,
+            GSheetRef(
+                service=self.service,
+                spreadsheet_id=self.spreadsheet_id,
+                sheet_prefix=self.sheet_prefix,
+                ref=address,
+                values=value,
+            ),
+        )
+
     def address(self) -> str:
         if (
             self.range.min_col != self.range.max_col
@@ -1047,7 +1088,8 @@ class GSheetRef(ApiRef):
     def row_entry(self, idx: int) -> Any:
         try:
             if not list_like(self.values[0]):
-                return self.values[idx]
+                address = Address(self.range.min_col, self.range.min_row + idx, 0)
+                return self.with_value(address, self.values[idx])
 
             if len(self.values) == 1:
                 return self.values[0][idx]
@@ -1055,9 +1097,15 @@ class GSheetRef(ApiRef):
                 return self.values[idx][0]
         except IndexError:
             r = self.range
-            infinite = (r.max_col if r.min_row == r.max_row else r.max_row) == -1
+            horizontal = r.min_row == r.max_row
+            infinite = (r.max_col if horizontal else r.max_row) == -1
             if infinite:
-                return None
+                address = Address(
+                    self.range.min_col + (idx if horizontal else 0),
+                    self.range.min_row + (idx if not horizontal else 0),
+                    0,
+                )
+                return self.with_value(address, None)
             raise
 
     def current_max_col_row(self) -> tuple[int, int]:
@@ -1181,31 +1229,16 @@ class GSheetNamedRanges:
         self.service = service
         self.spreadsheet_id = spreadsheet_id
 
-    @staticmethod
-    def _handle_gsheet_error(name: str, e: GSheetError) -> None:
-        if "Unable to parse range" in e.error.reason:
-            raise SheetsAPIError(
-                f"Named Range: {name} does not exist. Create this named range in Google Sheets UI."
-            )
-        else:
-            raise e
-
     def __getitem__(self, name: str) -> Any:
         if not self.service:
             raise SheetsAPIError(
                 "Named ranges only available in Google Sheets context."
             )
-        try:
-            return get_named_range(self.service, self.spreadsheet_id, name)
-        except GSheetError as e:
-            self._handle_gsheet_error(name, e)
+        return get_named_range(self.service, self.spreadsheet_id, name)
 
     def __setitem__(self, name: str, value: Any) -> None:
         if not self.service:
             raise SheetsAPIError(
                 "Named ranges only available in Google Sheets context."
             )
-        try:
-            set_item(self.service, self.spreadsheet_id, name, value)
-        except GSheetError as e:
-            self._handle_gsheet_error(name, e)
+        set_item(self.service, self.spreadsheet_id, name, value)

@@ -23,6 +23,17 @@ from .cell_address import CoordAddr
 from .datetime_conversions import datetime_to_serial
 from .download import Download
 from .formulas.spreadsheet_error import SpreadsheetError
+from .mime_types import (
+    BYTES_MIME_KEY,
+    DATETIME_KEY,
+    DECIMAL_MIME_KEY,
+    GSHEET_DOWNLOAD_KEY,
+    GSHEET_ERROR_KEY,
+    GSHEET_IMAGE_KEY,
+    JSON_MIME_KEY,
+    NUMBER_MIME_KEY,
+    WELL_KNOWN_TEXT_KEY,
+)
 from .neptyne_protocol import MIMETypes
 from .pandas_unrolling import dataframe_to_grid
 from .primitives import Empty
@@ -36,18 +47,6 @@ SheetUpdate = tuple[str, CoordAddr | None, ChangeList]
 
 ATTRIBUTE_UPDATE_KEY = "attributes"
 REQUEST_ATTRIBUTE_UPDATE_KEY = "request_attributes"
-JSON_MIME_KEY = "application/json"
-TEXT_MIME_KEY = "text/plain"
-CSV_MIME_KEY = "text/csv"
-SVG_MIME_KEY = "image/svg+xml"
-NUMBER_MIME_KEY = "application/number"
-BYTES_MIME_KEY = "application/bytes"
-DECIMAL_MIME_KEY = "application/decimal"
-GSHEET_ERROR_KEY = "application/vnd.neptyne.error+json"
-GSHEET_IMAGE_KEY = "application/vnd.neptyne.image+json"
-WELL_KNOWN_TEXT_KEY = "application/vnd.wkt+text"
-DATETIME_KEY = "application/vnd.neptyne.datetime+json"
-GSHEET_DOWNLOAD_KEY = "application/vnd.neptyne.download+json"
 
 
 def image_from_b64(encoded: str) -> Image:

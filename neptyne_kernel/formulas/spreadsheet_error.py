@@ -12,18 +12,20 @@ UNSUPPORTED_TYPE_RE = re.compile(
 )
 
 CODE_ROOT = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
+FUTURES_THREAD = "concurrent/futures/thread.py"
 
 TRACEBACK_FILE_HEADER_RE = re.compile(r"File \[\d;32m(?P<path>.+)\:(?P<line>\d+)")
 
 SHOW_FULL_TRACEBACK = os.environ.get("KERNEL_NAMESPACE", "") != "default"
-
-SHOW_FULL_TRACEBACK = False
 
 
 def should_hide_errors_from_file(path: str) -> bool:
     if SHOW_FULL_TRACEBACK:
         return False
     path = os.path.expanduser(path)
+    if path.endswith(FUTURES_THREAD):
+        # remove also futures so the user doesn't get confused when we have bits running in a thread:
+        return True
     if os.path.exists(path):
         return path.startswith(CODE_ROOT)
     return os.path.exists(os.path.join(CODE_ROOT, path[1:]))

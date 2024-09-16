@@ -1,0 +1,8 @@
+{
+ "argv": ["python","-m","neptyne_kernel.kernel", "-f", "{connection_file}"],
+ "display_name": "Neptyne Kernel",
+ "language": "python",
+ "env": {
+  "NEPTYNE_LOCAL_REPL": "1"
+ }
+}

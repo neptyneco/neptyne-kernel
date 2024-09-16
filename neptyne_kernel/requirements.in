@@ -17,6 +17,7 @@ geopandas
 geoplot
 geopy
 google-api-python-client
+google-auth-httplib2
 google-cloud-bigquery
 google-cloud-bigquery-storage
 google-generativeai
@@ -29,6 +30,7 @@ ipykernel
 isoweek
 jaconv
 json-fix
+jwt
 libcst
 lxml
 mapboxgl
@@ -50,6 +52,7 @@ pygments
 pyflakes
 pyxirr
 qrcode
+reflex
 roman
 scikit-learn
 scipy

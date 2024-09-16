@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 from typing import Any, Callable
 
@@ -42,6 +43,9 @@ def streamlit(
             auto_open=auto_open,
             public=public,
         )
+
+    if bool(os.getenv("NEPTYNE_LOCAL_NKS_KERNEL")):
+        raise ValueError("Streamlit apps are not yet supported in local kernels")
 
     @wraps(fn)
     def wrapper(*args: Any, **kwargs: Any) -> Any:

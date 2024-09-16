@@ -32,7 +32,7 @@ import pandas as pd
 from shapely.geometry.base import BaseGeometry
 
 from .api_ref import ApiRef, Int, IntOrSlice, shape, slice_or_int_to_range
-from .cell_address import Range
+from .cell_address import Address, Range
 from .cell_api import CellApiMixin
 from .neptyne_protocol import (
     CellAttribute,
@@ -959,6 +959,10 @@ class CellRangeGSheet(CellRangeList, CellApiMixin):
     def ref(self) -> ApiRef:  # type: ignore
         return self.gspread_ref
 
+    @property
+    def range(self) -> Range:
+        return self.ref.range
+
     def __iter__(self) -> Iterator:
         if self.two_dimensional:
             for row_idx, row in enumerate(self._values):
@@ -972,7 +976,14 @@ class CellRangeGSheet(CellRangeList, CellApiMixin):
                     )
                 )
         else:
-            yield from self._values
+            for idx, val in enumerate(self._values):
+                horizontal = self.range.min_row == self.range.max_row
+                address = Address(
+                    self.range.min_col + (idx if horizontal else 0),
+                    self.range.min_row + (idx if not horizontal else 0),
+                    0,
+                )
+                yield self.gspread_ref.with_value(address, val)
 
     def __setitem__(
         self, key: tuple[IntOrSlice, IntOrSlice] | IntOrSlice | str, value: Any

@@ -26,15 +26,16 @@ RUN mkdir /.streamlit && touch /.streamlit/config.toml
 
 COPY requirements.txt ./
 
-COPY formulas kernel/formulas
-COPY widgets kernel/widgets
-COPY tyne_model kernel/tyne_model
-COPY neptyne_api kernel/neptyne_api
-COPY kernel_globals kernel/kernel_globals
-COPY kernel_entrypoint.sh kernel/
-COPY *.py kernel/
+COPY formulas neptyne_kernel/formulas
+COPY widgets neptyne_kernel/widgets
+COPY tyne_model neptyne_kernel/tyne_model
+COPY neptyne_api neptyne_kernel/neptyne_api
+COPY kernel_globals neptyne_kernel/kernel_globals
+COPY nks neptyne_kernel/nks
+COPY kernel_entrypoint.sh neptyne_kernel/
+COPY *.py neptyne_kernel/
 
 ENV KERNEL_LANGUAGE python
 ENV PATH="/opt/venv/bin:$PATH"
 
-CMD /kernel/kernel_entrypoint.sh
+CMD /neptyne_kernel/kernel_entrypoint.sh
