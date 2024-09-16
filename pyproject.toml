@@ -1,6 +1,6 @@
 [project]
 name = "neptyne-kernel"
-version = "0.1.6"
+version = "0.1.7"
 description = "The Neptyne kernel"
 readme = "README.md"
 authors = []
@@ -15,6 +15,6 @@ Homepage = "https://neptyne.com"
 Documentation = "https://docs.neptyne.com"
 Repository = "https://github.com/neptyneco/neptyne-kernel.git"
 [tool.setuptools.dynamic]
-dependencies = { file = ["kernel/requirements.txt"] }
+dependencies = { file = ["neptyne_kernel/requirements.txt"] }
 [tool.setuptools.package-data]
 neptyne_kernel = ["kernel_spec/neptyne/kernel.json"]
