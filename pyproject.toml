@@ -13,3 +13,5 @@ Documentation = "https://docs.neptyne.com"
 Repository = "https://github.com/neptyneco/neptyne-kernel.git"
 [tool.setuptools.dynamic]
 dependencies = { file = ["kernel/requirements.txt"] }
+[tool.setuptools.package-data]
+neptyne_kernel = ["kernel_spec/neptyne/kernel.json"]
