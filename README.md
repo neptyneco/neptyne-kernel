@@ -32,7 +32,7 @@ You can configure the Neptyne kernel to run in a Jupyter notebook, and connect i
 
 ```shell
 neptyne_kernel_spec=$(python -c 'import neptyne_kernel, pathlib; print(pathlib.Path(neptyne_kernel.__file__).parent / "kernel_spec" / "neptyne")')
-jupyter kernelspec add $neptyne_kernel_spec
+jupyter kernelspec install $neptyne_kernel_spec
 ```
 
 Then, in a Jupyter notebook, select "Neptyne" as your kernel type. After obtaining an API key from a Google Sheet using the Neptyne extension, you can connect your notebook to your sheet using:
