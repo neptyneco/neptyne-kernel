@@ -85,11 +85,11 @@
 #     result = insert_delete_reply_cell_type_from_dict(json.loads(json_string))
 #     result = cell_type_from_dict(json.loads(json_string))
 
-from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, cast
-
+from typing import List, Optional, Any, Union, Dict, TypeVar, Callable, Type, cast
+from datetime import datetime
 import dateutil.parser
+
 
 T = TypeVar("T")
 EnumT = TypeVar("EnumT", bound=Enum)
@@ -510,6 +510,7 @@ class MessageTypes(Enum):
     NAVIGATE_TO = "navigate_to"
     NOTIFY_OWNER = "notify_owner"
     PING = "ping"
+    RECONNECT_KERNEL = "reconnect_kernel"
     RELOAD_ENV = "reload_env"
     RENAME_SHEET = "rename_sheet"
     RENAME_TYNE = "rename_tyne"

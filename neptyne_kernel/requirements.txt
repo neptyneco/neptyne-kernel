@@ -6,6 +6,8 @@ aiohttp==3.8.4
     # via -r neptyne_kernel/requirements.in
 aiosignal==1.2.0
     # via aiohttp
+alembic==1.13.2
+    # via reflex
 altair==4.2.0
     # via
     #   -r neptyne_kernel/requirements.in
@@ -17,8 +19,10 @@ anthropic==0.30.0
 anyio==3.7.0
     # via
     #   anthropic
-    #   httpcore
+    #   httpx
     #   openai
+    #   starlette
+    #   watchfiles
 appnope==0.1.4
     # via
     #   ipykernel
@@ -26,7 +30,9 @@ appnope==0.1.4
 asttokens==2.0.5
     # via stack-data
 async-timeout==4.0.2
-    # via aiohttp
+    # via
+    #   aiohttp
+    #   redis
 attrs==21.4.0
     # via
     #   aiohttp
@@ -35,10 +41,14 @@ attrs==21.4.0
     #   rasterio
 backcall==0.2.0
     # via ipython
+backports-tarfile==1.2.0
+    # via jaraco-context
 bahttext==1.0.2
     # via -r neptyne_kernel/requirements.in
 beautifulsoup4==4.11.1
     # via bs4
+bidict==0.23.1
+    # via python-socketio
 black==22.3.0
     # via -r neptyne_kernel/requirements.in
 blinker==1.7.0
@@ -49,6 +59,8 @@ branca==0.7.0
     # via folium
 bs4==0.0.1
     # via -r neptyne_kernel/requirements.in
+build==1.2.1
+    # via reflex
 cachetools==5.3.2
     # via
     #   google-auth
@@ -65,9 +77,13 @@ certifi==2021.10.8
     #   pyproj
     #   rasterio
     #   requests
-charset-normalizer==2.0.12
+cffi==1.17.1
+    # via cryptography
+charset-normalizer==3.3.2
     # via
     #   aiohttp
+    #   reflex
+    #   reflex-hosting-cli
     #   requests
 chroma-py==0.1.0.dev1
     # via mapboxgl
@@ -80,6 +96,8 @@ click==8.1.3
     #   mercantile
     #   rasterio
     #   streamlit
+    #   typer
+    #   uvicorn
 click-plugins==1.1.1
     # via
     #   fiona
@@ -98,6 +116,8 @@ contourpy==1.0.7
     #   matplotlib
 croniter==2.0.1
     # via -r neptyne_kernel/requirements.in
+cryptography==43.0.1
+    # via jwt
 cycler==0.11.0
     # via matplotlib
 db-dtypes==1.2.0
@@ -108,16 +128,22 @@ decorator==5.1.1
     # via ipython
 descartes==1.1.0
     # via -r neptyne_kernel/requirements.in
+dill==0.3.8
+    # via reflex
 distro==1.8.0
     # via
     #   anthropic
     #   openai
+docutils==0.21.2
+    # via readme-renderer
 entrypoints==0.4
     # via altair
 et-xmlfile==1.1.0
     # via openpyxl
 executing==0.8.3
     # via stack-data
+fastapi==0.110.3
+    # via reflex
 fastavro==1.9.3
     # via -r neptyne_kernel/requirements.in
 fastjsonschema==2.19.1
@@ -179,7 +205,9 @@ google-auth==2.23.4
     #   google-generativeai
     #   gspread
 google-auth-httplib2==0.1.1
-    # via google-api-python-client
+    # via
+    #   -r neptyne_kernel/requirements.in
+    #   google-api-python-client
 google-auth-oauthlib==1.1.0
     # via gspread
 google-cloud-bigquery==3.16.0
@@ -212,20 +240,27 @@ gspread==5.10.0
     #   gspread-asyncio
 gspread-asyncio==1.9.0
     # via -r neptyne_kernel/requirements.in
+gunicorn==22.0.0
+    # via reflex
 h11==0.14.0
-    # via httpcore
+    # via
+    #   httpcore
+    #   uvicorn
+    #   wsproto
 html5lib==1.1
     # via -r neptyne_kernel/requirements.in
-httpcore==0.17.2
+httpcore==1.0.5
     # via httpx
 httplib2==0.22.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-httpx==0.24.1
+httpx==0.27.0
     # via
     #   anthropic
     #   openai
+    #   reflex
+    #   reflex-hosting-cli
 idna==3.3
     # via
     #   anyio
@@ -234,6 +269,10 @@ idna==3.3
     #   yarl
 iexfinance==0.5.0
     # via -r neptyne_kernel/requirements.in
+importlib-metadata==8.2.0
+    # via
+    #   keyring
+    #   twine
 ipykernel==6.13.0
     # via -r neptyne_kernel/requirements.in
 ipython==8.3.0
@@ -242,6 +281,12 @@ isoweek==1.3.3
     # via -r neptyne_kernel/requirements.in
 jaconv==0.3.4
     # via -r neptyne_kernel/requirements.in
+jaraco-classes==3.4.0
+    # via keyring
+jaraco-context==5.3.0
+    # via keyring
+jaraco-functools==4.0.2
+    # via keyring
 jedi==0.18.1
     # via ipython
 jinja2==3.1.2
@@ -253,6 +298,8 @@ jinja2==3.1.2
     #   mapboxgl
     #   pdoc
     #   pydeck
+    #   reflex
+    #   starlette-admin
 jiter==0.5.0
     # via anthropic
 joblib==1.3.2
@@ -271,12 +318,20 @@ jupyter-core==5.3.0
     # via
     #   jupyter-client
     #   nbformat
+jwt==1.3.1
+    # via -r neptyne_kernel/requirements.in
+keyring==25.3.0
+    # via twine
 kiwisolver==1.4.4
     # via matplotlib
+lazy-loader==0.4
+    # via reflex
 libcst==1.3.1
     # via -r neptyne_kernel/requirements.in
 lxml==4.9.2
     # via -r neptyne_kernel/requirements.in
+mako==1.3.5
+    # via alembic
 mapboxgl==0.10.2
     # via -r neptyne_kernel/requirements.in
 mapclassify==2.6.1
@@ -290,6 +345,7 @@ markdown-it-py==3.0.0
 markupsafe==2.1.2
     # via
     #   jinja2
+    #   mako
     #   pdoc
 matplotlib==3.7.1
     # via
@@ -308,6 +364,10 @@ mdurl==0.1.2
     # via markdown-it-py
 mercantile==1.2.1
     # via contextily
+more-itertools==10.4.0
+    # via
+    #   jaraco-classes
+    #   jaraco-functools
 multidict==6.0.4
     # via
     #   aiohttp
@@ -322,6 +382,8 @@ networkx==3.0
     # via
     #   -r neptyne_kernel/requirements.in
     #   mapclassify
+nh3==0.2.18
+    # via readme-renderer
 numpy==1.24.2
     # via
     #   -r neptyne_kernel/requirements.in
@@ -355,16 +417,20 @@ openpyxl==3.1.2
     # via -r neptyne_kernel/requirements.in
 orjson==3.9.1
     # via -r neptyne_kernel/requirements.in
-packaging==23.0
+packaging==24.1
     # via
     #   bokeh
+    #   build
     #   cartopy
     #   db-dtypes
     #   geopandas
     #   google-cloud-bigquery
+    #   gunicorn
     #   ipykernel
+    #   lazy-loader
     #   matplotlib
     #   pooch
+    #   reflex
     #   statsmodels
     #   streamlit
 pandas==1.5.3
@@ -399,11 +465,19 @@ pillow==9.4.0
     #   contextily
     #   matplotlib
     #   streamlit
-platformdirs==3.0.0
+pip==24.2
+    # via pipdeptree
+pipdeptree==2.16.2
+    # via reflex-hosting-cli
+pkginfo==1.10.0
+    # via twine
+platformdirs==4.2.2
     # via
     #   black
     #   jupyter-core
     #   pooch
+    #   reflex
+    #   reflex-hosting-cli
 plotly==5.8.0
     # via -r neptyne_kernel/requirements.in
 pooch==1.8.0
@@ -425,7 +499,9 @@ protobuf==4.25.1
     #   proto-plus
     #   streamlit
 psutil==5.9.4
-    # via ipykernel
+    # via
+    #   ipykernel
+    #   reflex
 ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.2
@@ -440,11 +516,17 @@ pyasn1==0.5.0
     #   rsa
 pyasn1-modules==0.3.0
     # via google-auth
+pycparser==2.22
+    # via cffi
 pydantic==2.4.2
     # via
     #   anthropic
+    #   fastapi
     #   google-generativeai
     #   openai
+    #   reflex
+    #   reflex-hosting-cli
+    #   sqlmodel
 pydantic-core==2.10.1
     # via pydantic
 pydeck==0.8.0
@@ -458,6 +540,7 @@ pygments==2.17.2
     #   -r neptyne_kernel/requirements.in
     #   ipython
     #   pdoc
+    #   readme-renderer
     #   rich
 pyparsing==3.0.9
     # via
@@ -470,6 +553,8 @@ pyproj==3.6.1
     # via
     #   cartopy
     #   geopandas
+pyproject-hooks==1.1.0
+    # via build
 pyrsistent==0.19.3
     # via jsonschema
 pyshp==2.3.1
@@ -481,6 +566,17 @@ python-dateutil==2.8.2
     #   jupyter-client
     #   matplotlib
     #   pandas
+    #   reflex-hosting-cli
+python-engineio==4.9.1
+    # via
+    #   python-socketio
+    #   reflex
+python-multipart==0.0.9
+    # via
+    #   reflex
+    #   starlette-admin
+python-socketio==5.11.3
+    # via reflex
 pytz==2022.1
     # via
     #   croniter
@@ -497,6 +593,14 @@ qrcode==7.4.2
     # via -r neptyne_kernel/requirements.in
 rasterio==1.3.9
     # via contextily
+readme-renderer==44.0
+    # via twine
+redis==5.0.1
+    # via reflex
+reflex==0.5.9
+    # via -r neptyne_kernel/requirements.in
+reflex-hosting-cli==0.1.13
+    # via reflex
 requests==2.31.0
     # via
     #   contextily
@@ -507,14 +611,25 @@ requests==2.31.0
     #   iexfinance
     #   pooch
     #   requests-oauthlib
+    #   requests-toolbelt
     #   streamlit
     #   tweepy
+    #   twine
 requests-oauthlib==1.3.1
     # via
     #   google-auth-oauthlib
     #   tweepy
+requests-toolbelt==1.0.0
+    # via twine
+rfc3986==2.0.0
+    # via twine
 rich==13.7.1
-    # via streamlit
+    # via
+    #   reflex
+    #   reflex-hosting-cli
+    #   streamlit
+    #   twine
+    #   typer
 roman==3.3
     # via -r neptyne_kernel/requirements.in
 rsa==4.9
@@ -538,12 +653,17 @@ setuptools==70.1.1
     #   fiona
     #   ipython
     #   rasterio
+    #   reflex
 sgmllib3k==1.0.0
     # via feedparser
 shapely==2.0.2
     # via
     #   cartopy
     #   geopandas
+shellingham==1.5.4
+    # via typer
+simple-websocket==1.0.0
+    # via python-engineio
 six==1.16.0
     # via
     #   asttokens
@@ -557,19 +677,32 @@ sniffio==1.3.0
     # via
     #   anthropic
     #   anyio
-    #   httpcore
     #   httpx
     #   openai
 snuggs==1.4.7
     # via rasterio
 soupsieve==2.3.2.post1
     # via beautifulsoup4
+sqlalchemy==2.0.32
+    # via
+    #   alembic
+    #   sqlmodel
+sqlmodel==0.0.21
+    # via reflex
 stack-data==0.2.0
     # via ipython
+starlette==0.37.2
+    # via
+    #   fastapi
+    #   starlette-admin
+starlette-admin==0.14.1
+    # via reflex
 statsmodels==0.13.5
     # via -r neptyne_kernel/requirements.in
 streamlit==1.36.0
     # via -r neptyne_kernel/requirements.in
+tabulate==0.9.0
+    # via reflex-hosting-cli
 tenacity==8.2.3
     # via
     #   plotly
@@ -582,6 +715,8 @@ tokenizers==0.13.3
     # via anthropic
 toml==0.10.2
     # via streamlit
+tomlkit==0.13.2
+    # via reflex
 toolz==0.11.2
     # via altair
 tornado==6.2
@@ -604,25 +739,51 @@ traitlets==5.9.0
     #   nbformat
 tweepy==4.9.0
     # via -r neptyne_kernel/requirements.in
+twine==5.1.1
+    # via reflex
+typer==0.12.3
+    # via
+    #   reflex
+    #   reflex-hosting-cli
 typing-extensions==4.8.0
     # via
+    #   alembic
     #   anthropic
+    #   fastapi
     #   google-generativeai
     #   openai
     #   pydantic
     #   pydantic-core
     #   qrcode
+    #   sqlalchemy
     #   streamlit
+    #   typer
 untokenize==0.1.1
     # via -r neptyne_kernel/requirements.in
 uritemplate==4.1.1
     # via google-api-python-client
 urllib3==1.26.9
-    # via requests
+    # via
+    #   requests
+    #   twine
+uvicorn==0.30.6
+    # via reflex
+watchdog==4.0.2
+    # via reflex
+watchfiles==0.23.0
+    # via reflex
 wcwidth==0.2.5
     # via prompt-toolkit
 webencodings==0.5.1
     # via html5lib
+websockets==12.0
+    # via reflex-hosting-cli
+wheel==0.44.0
+    # via reflex
+wrapt==1.16.0
+    # via reflex
+wsproto==1.2.0
+    # via simple-websocket
 xyzservices==2023.10.1
     # via
     #   bokeh
@@ -630,3 +791,5 @@ xyzservices==2023.10.1
     #   folium
 yarl==1.8.2
     # via aiohttp
+zipp==3.20.0
+    # via importlib-metadata

@@ -9,7 +9,7 @@ def test_dockerfile():
     parent_dir = Path(__file__).parent
     dockerfile = (parent_dir / "Dockerfile").read_text()
     dirs = {file.name for file in parent_dir.iterdir() if file.is_dir()}
-    dirs.difference_update({"__pycache__", ".pytest_cache"})
+    dirs.difference_update({"__pycache__", ".pytest_cache", "venv", "kernel_spec"})
     for line in dockerfile.splitlines():
         if line.startswith("COPY"):
             parts = line.split()

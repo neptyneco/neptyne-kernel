@@ -6,10 +6,10 @@ from typing import Any, Iterator
 from ..cell_address import Address, format_cell
 from ..expression_compiler import is_cell_formula
 from ..mime_handling import (
-    JSON_MIME_KEY,
     JSONPrimitive,
     output_to_value,
 )
+from ..mime_types import JSON_MIME_KEY
 from ..neptyne_protocol import CellAttribute, MIMETypes
 from .jupyter_notebook import Output, OutputType
 

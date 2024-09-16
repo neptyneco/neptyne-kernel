@@ -1,4 +1,5 @@
 import colorsys
+import os
 from dataclasses import dataclass
 from io import BytesIO
 
@@ -80,6 +81,8 @@ def get_user() -> User | None:
 
 
 def get_api_token() -> str | None:
+    if token := os.getenv("NEPTYNE_API_TOKEN"):
+        return token
     if is_running_in_streamlit():
         from .dash import Dash
 

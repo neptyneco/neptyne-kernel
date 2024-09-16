@@ -9,7 +9,7 @@ launch_python_kernel() {
     export JPY_PARENT_PID=$$  # Force reset of parent pid since we're detached
 
 	  set -x
-	  python -m kernel.launch_ipykernel \
+	  python -m neptyne_kernel.launch_ipykernel \
 	      --key "$KERNEL_KEY"
 	  { set +x; } 2>/dev/null
 }

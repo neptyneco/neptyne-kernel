@@ -11,6 +11,7 @@ from .dash import Dash
 from .datetime_conversions import datetime_to_serial
 from .gsheets_api import Formula
 from .neptyne_protocol import Dimension
+from .primitives import NeptynePrimitive, unproxy_val
 
 SPREADSHEET_ID = "spreadsheet_id"
 
@@ -313,6 +314,32 @@ def test_set_get_item_range(dash):
     assert dash[address] == 1
     assert dash[Address.from_a1("B3")] == 3
 
+    r = dash[Range.from_a1("B2:C3")]
+    assert r[1][1] == 4
+
+
+def test_types(dash):
+    address = Address.from_a1("A1")
+    dash[address] = [[1, 2, 3], [3, 4, 5]]
+    v = dash[address]
+    assert isinstance(v, NeptynePrimitive)
+
+    r = dash[Range.from_a1("A1:A3")]
+    assert isinstance(r[1], NeptynePrimitive)
+    for v in r:
+        assert isinstance(v, NeptynePrimitive)
+
+    r = dash[Range.from_a1("A1:C1")]
+    assert isinstance(r[1], NeptynePrimitive)
+    for v in r:
+        assert isinstance(v, NeptynePrimitive)
+
+    r2 = dash[Range.from_a1("A1:C3")]
+    assert isinstance(r2[2][1], NeptynePrimitive)
+    for r in r2:
+        for v in r:
+            assert isinstance(v, NeptynePrimitive)
+
 
 def test_sheet_set_get_item(dash):
     dash[(0, 0, "Sheet1")] = "Test Value"
@@ -324,7 +351,7 @@ def test_insert_delete(dash):
     result = cell_range.insert_row(0, "test")
     assert isinstance(result, CellRangeGSheet)
     assert result[0] == "test"
-    assert result[1] is None
+    assert result[1].is_empty()
     assert dash[Range.from_a1("A1")] == "test"
 
     cell_range.insert_row(0, "test2")
@@ -495,7 +522,7 @@ def test_append_row(dash, a1_notation, values, row, check, expected):
     apply_values(dash, values)
     cr = dash[range_from_a1(a1_notation)]
     cr.append_row(row)
-    assert dash[Range.from_a1(check)].to_list() == expected
+    assert to_list(dash[Range.from_a1(check)]) == expected
 
 
 @pytest.mark.parametrize(
@@ -536,28 +563,37 @@ def test_indexes(dash, a1_notation, index, expected):
     assert val == expected
 
 
+def to_list(cr):
+    def unproxy_row(row):
+        return [unproxy_val(cell) for cell in row]
+
+    if cr.two_dimensional:
+        return [unproxy_row(row) for row in cr]
+    return unproxy_row(cr)
+
+
 def test_infinite_range_read(dash):
     dash[Address.from_a1("B2")] = [["b2", "c2"], ["b3", "c3"]]
     one_column = dash[range_from_a1("B2:B")]
     assert one_column[0] == "b2"
-    assert one_column[2] is None
+    assert one_column[2].is_empty()
 
     one_row = dash[range_from_a1("B2:2")]
     assert one_row[0] == "b2"
-    assert one_row[2] is None
+    assert one_row[2].is_empty()
 
     two_columns = dash[range_from_a1("B2:C")]
-    assert two_columns[0].to_list() == ["b2", "c2"]
-    assert two_columns[2].to_list() == [None, None]
+    assert to_list(two_columns[0]) == ["b2", "c2"]
+    assert to_list(two_columns[2]) == [None, None]
 
     two_columns_10 = two_columns[:10]
-    assert two_columns_10[0].to_list() == ["b2", "c2"]
+    assert to_list(two_columns_10[0]) == ["b2", "c2"]
 
     four_cells = dash[range_from_a1("B2:C3")]
-    assert four_cells.to_list() == [["b2", "c2"], ["b3", "c3"]]
+    assert to_list(four_cells) == [["b2", "c2"], ["b3", "c3"]]
 
     four_cells = dash[range_from_a1("B3:C4")]
-    assert four_cells.to_list() == [["b3", "c3"], [None, None]]
+    assert to_list(four_cells) == [["b3", "c3"], [None, None]]
 
 
 @pytest.mark.parametrize(
@@ -584,13 +620,13 @@ def test_infinite_range_write(dash):
     one_column = dash[range_from_a1("B2:B")]
     one_column[3] = "b5"
     assert dash[Address.from_a1("B5")] == "b5"
-    assert one_column[2] is None
+    assert one_column[2].is_empty()
     assert one_column[3] == "b5"
 
     one_row = dash[range_from_a1("B2:2")]
     one_row[3] = "e2"
     assert dash[Address.from_a1("E2")] == "e2"
-    assert one_row[2] is None
+    assert one_row[2].is_empty()
     assert one_row[3] == "e2"
 
     two_columns = dash[range_from_a1("B2:C")]

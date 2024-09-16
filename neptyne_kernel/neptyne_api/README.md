@@ -113,7 +113,7 @@ class.
 
 Other proxied types exist on cells, such as `NeptyneFloat`, `NeptyneStr`.
 
-Check the [Cell API](/kernel/neptyne_api/cell#CellApiMixin) for a list of all the methods available on cells.
+Check the [Cell API](/neptyne_kernel/neptyne_api/cell#CellApiMixin) for a list of all the methods available on cells.
 
 ## Spilling Values
 
@@ -289,15 +289,15 @@ lists.
 >>> l = A1:B3.to_list()
 ```
 
-A full list of available functions for [Cell Range](/kernel/neptyne_api/cell_range#CellRange) is here.
+A full list of available functions for [Cell Range](/neptyne_kernel/neptyne_api/cell_range#CellRange) is here.
 
 ## Insert and delete API
 
 Of particular utility, are the insert and delete methods for cell ranges:
 
-- [insert_row](/kernel/neptyne_api/cell_range#CellRange.insert_row)
-- [delete_row](/kernel/neptyne_api/cell_range#CellRange.delete_row)
-- [append_row](/kernel/neptyne_api/cell_range#CellRange.append_row)
+- [insert_row](/neptyne_kernel/neptyne_api/cell_range#CellRange.insert_row)
+- [delete_row](/neptyne_kernel/neptyne_api/cell_range#CellRange.delete_row)
+- [append_row](/neptyne_kernel/neptyne_api/cell_range#CellRange.append_row)
 
 These operations are bound to the cell range they are called on and won't read or write to any other cells.
 
@@ -360,7 +360,7 @@ nt.sheets['Sheet1'][x, y + 1] = 'Below B3'
 
 ## Inserting and deleting sheets
 
-[NeptyneSheet](/kernel/neptyne_api/sheet#NeptyneSheetCollection) has a full list of available functions
+[NeptyneSheet](/neptyne_kernel/neptyne_api/sheet#NeptyneSheetCollection) has a full list of available functions
 available on the sheet collection such as programmatically adding new sheets with:
 
 ```python
@@ -428,13 +428,13 @@ def app():
 # Secrets
 
 Secrets are managed primarily through the Neptyne UI. You can access them in your code via the
-[get_secret](/kernele_api#get_secret) function.
+[get_secret](/neptyne_kernel/neptyne_api#get_secret) function.
 
 # Full Google API Access
 
 Currently Neptyne is under active development and we are working on adding more features and improving our API.
 
-If we are missing a features, it is possible to access the full Google API using the [google](/kernele_api/google) module.
+If we are missing a features, it is possible to access the full Google API using the [google](/neptyne_kernel/neptyne_api/google) module.
 
 We've made things much easier for you though! In particular all of the authentication and setup is done for you.
 Additionally, Neptyne cell ranges can be used as a proxy for Google Sheets ranges.

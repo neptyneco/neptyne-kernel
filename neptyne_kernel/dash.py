@@ -41,6 +41,7 @@ import dateutil.tz
 import numpy as np
 import pandas as pd
 import plotly.io as pio
+import requests
 from croniter import croniter
 from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
@@ -106,15 +107,6 @@ from .insert_delete_helper import add_delete_cells_helper
 from .kernel_runtime import get_kernel, send_sync_request
 from .linter import TyneCachingCompiler
 from .mime_handling import (
-    BYTES_MIME_KEY,
-    CSV_MIME_KEY,
-    DECIMAL_MIME_KEY,
-    GSHEET_ERROR_KEY,
-    JSON_MIME_KEY,
-    NUMBER_MIME_KEY,
-    SVG_MIME_KEY,
-    TEXT_MIME_KEY,
-    WELL_KNOWN_TEXT_KEY,
     as_json,
     datetime_bundle,
     encode_for_gsheets,
@@ -124,6 +116,17 @@ from .mime_handling import (
     gsheet_spreadsheet_error_from_python_exception,
     maybe_format_common_values,
     output_to_value,
+)
+from .mime_types import (
+    BYTES_MIME_KEY,
+    CSV_MIME_KEY,
+    DECIMAL_MIME_KEY,
+    GSHEET_ERROR_KEY,
+    JSON_MIME_KEY,
+    NUMBER_MIME_KEY,
+    SVG_MIME_KEY,
+    TEXT_MIME_KEY,
+    WELL_KNOWN_TEXT_KEY,
 )
 from .mutex_manager import MutexManager
 from .neptyne_protocol import (
@@ -451,6 +454,7 @@ class Dash:
     _gsheet_service: Resource | None
 
     _cell_execution_stack: list[Address]
+    local_repl_mode: bool = False
 
     def __init__(self, silent: bool = False) -> None:
         if Dash._instance is not None:
@@ -488,9 +492,8 @@ class Dash:
         self._pending_display_msg: dict[str, Any] | None = None
         self._mutex_manager = MutexManager()
 
-        parent = ip if isinstance(ip, InteractiveShell) else None
-
         if ip is not None:
+            parent = ip if isinstance(ip, InteractiveShell) else None
             ip.InteractiveTB = DashAutoFormattedTB(
                 mode="Plain",
                 color_scheme="LightBG",
@@ -529,6 +532,9 @@ class Dash:
 
         self.cur_streamlit_info = None
         self.prev_streamlit_info = None
+        self.local_repl_mode = bool(os.getenv("NEPTYNE_LOCAL_REPL"))
+        self.api_key = ""
+        self.api_host = ""
 
     @classmethod
     def instance(cls) -> "Dash":
@@ -947,7 +953,9 @@ class Dash:
             return
 
         init_payload = InitPhase1Payload.from_bytes(payload)
+        self.initialize_phase_1_decoded(init_payload)
 
+    def initialize_phase_1_decoded(self, init_payload: InitPhase1Payload) -> None:
         self.in_gs_mode = init_payload.in_gs_mode
         self.gsheets_spreadsheet_id = init_payload.gsheets_sheet_id
         if self.gsheets_spreadsheet_id:
@@ -969,7 +977,9 @@ class Dash:
 
     def initialize_phase_2(self, payload: bytes) -> None:
         init_payload = InitPhase2Payload.from_bytes(payload)
+        self.initialize_phase_2_decoded(init_payload)
 
+    def initialize_phase_2_decoded(self, init_payload: InitPhase2Payload) -> None:
         self.broadcast_init_stage(KernelInitState.LOADING_SHEET_VALUES)
         self.load_values(init_payload.sheets)
 
@@ -1472,10 +1482,63 @@ class Dash:
 
         return address
 
+    def initialize_interactive(self) -> None:
+        api_key = input("Enter API key: ")
+        self.initialize_local_kernel(api_key, "https://app.neptyne.com")
+
+    def get_api_token(self) -> tuple[str, str]:
+        if not self.api_key:
+            raise ValueError("API key not set. Use `do_repl_init` to set it.")
+        res = requests.get(
+            f"{self.api_host}/api/v1/token", params={"apiKey": self.api_key}
+        )
+        res.raise_for_status()
+        payload = res.json()
+        api_token = payload["token"]
+        gsheet_id = payload["gsheet_id"]
+        return api_token, gsheet_id
+
+    def initialize_local_kernel(self, api_key: str, api_host: str) -> None:
+        if self.initialized:
+            raise ValueError(
+                "Already initialized. If you need to connect to a different sheet, restart the kernel."
+            )
+        self.api_key = api_key
+        self.api_host = api_host
+
+        api_token, gsheet_id = self.get_api_token()
+
+        os.environ["NEPTYNE_API_TOKEN"] = api_token
+        self.initialize_phase_1_decoded(
+            InitPhase1Payload(
+                in_gs_mode=True,
+                gsheets_sheet_id=gsheet_id,
+                requirements="",
+                sheets=[],
+                time_zone="UTC",
+                streamlit_base_url_path="",
+                env={},
+            )
+        )
+        self.initialize_phase_2_decoded(
+            InitPhase2Payload(
+                sheets=TyneSheets(),
+                requires_recompile=False,
+            )
+        )
+        self.initialized = True
+
+        print("Connected to Google Sheet:")
+        print(f"https://docs.google.com/spreadsheets/d/{gsheet_id}")
+
     def __getitem__(
         self, item: CoordinateTuple | Address | Range
     ) -> float | str | int | SpreadsheetError | CellRange | CellApiMixin | None:
         from .dash_ref import DashRef
+
+        if not self.initialized and os.getenv("NEPTYNE_LOCAL_REPL"):
+            self.initialize_interactive()
+            return None
 
         if self.gsheet_service:
             return gsheets_api.get_item(
@@ -2612,7 +2675,7 @@ class Dash:
             return header.get("header")
 
     def _parent_header_matches_codepanel_cell(self) -> bool:
-        return bool(
+        return self.local_repl_mode or bool(
             (header := self._get_header())
             and header.get("cellId") == CODEPANEL_CELL_ID
             and threading.current_thread().name == "MainThread"
@@ -2975,44 +3038,30 @@ class Dash:
         request_headers: dict[str, str],
         request_query: dict[str, str],
     ) -> None:
+        status = "ok"
         func = self.api_functions.get(function_name)
-        if not func:
-            raise ValueError(f"Function {function_name} not found")
-        request = APIRequest(
-            body=request_body,
-            headers=request_headers,
-            query=request_query,
-        )
-        response, error = None, None
         try:
-            response = func(request)
-        except Exception as e:
-            error = repr(e)
-        if response:
-            try:
-                response = json.dumps(response)
-                content_type = "application/json"
-            except TypeError:
-                response = str(response)
-                content_type = "text/plain"
-            self.reply_to_client(
-                MessageTypes.USER_API_RESPONSE_STREAM,
-                {
-                    "content": response,
-                    "content_type": content_type,
-                    "session_id": session_id,
-                },
+            if not func:
+                raise ValueError(f"Function {function_name} not found")
+            request = APIRequest(
+                body=request_body,
+                headers=request_headers,
+                query=request_query,
             )
-        else:
-            self.reply_to_client(
-                MessageTypes.USER_API_RESPONSE_STREAM,
-                {
-                    "content": error,
-                    "error": True,
-                    "content_type": "text/plain",
-                    "session_id": session_id,
-                },
-            )
+            value = func(request)
+        except Exception:
+            etype, evalue, tb = sys.exc_info()
+            value = gsheet_spreadsheet_error_from_python_exception(etype, evalue, tb)
+            status = "error"
+        _, encoded = encode_for_gsheets(value)
+        self.reply_to_client(
+            MessageTypes.USER_API_RESPONSE_STREAM,
+            {
+                "content": json.loads(encoded),
+                "status": status,
+                "session_id": session_id,
+            },
+        )
 
     @property
     def gsheet_service(
@@ -3027,7 +3076,7 @@ class Dash:
                 "sheets",
                 "v4",
                 http=gsheets_api.ProxiedHttp(),
-                requestBuilder=gsheets_api.build_request,
+                requestBuilder=gsheets_api.request_builder(gsheets_api.Credentials()),
             )
 
         return self._gsheet_service
