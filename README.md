@@ -31,7 +31,7 @@ import neptyne_kernel.neptyne_api as nt
 You can configure the Neptyne kernel to run in a Jupyter notebook, and connect it to a Google sheet. To do so, first install the Neptyne kernel spec:
 
 ```shell
-$neptyne_kernel_spec=$(python -c 'import neptyne_kernel, pathlib; print(pathlib.Path(neptyne_kernel.__file__).parent / "kernel_spec" / "neptyne")')
+neptyne_kernel_spec=$(python -c 'import neptyne_kernel, pathlib; print(pathlib.Path(neptyne_kernel.__file__).parent / "kernel_spec" / "neptyne")')
 jupyter kernelspec add $neptyne_kernel_spec
 ```
 
