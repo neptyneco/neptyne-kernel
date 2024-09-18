@@ -29,7 +29,7 @@ from .date_time import (
     YEAR,
     YEARFRAC,
 )
-from .spreadsheet_datetime import (
+from ..spreadsheet_datetime import (
     SpreadsheetDate,
     SpreadsheetDateTime,
     SpreadsheetTime,
@@ -38,7 +38,7 @@ from .spreadsheet_datetime import (
     excel2datetime,
     timedelta,
 )
-from .spreadsheet_error import NUM_ERROR, VALUE_ERROR
+from ..spreadsheet_error import NUM_ERROR, VALUE_ERROR
 
 WORKDAY_INTL_RANGE = CellRange(
     [

@@ -15,7 +15,7 @@ from IPython.utils import py3compat
 from stack_data.core import RepeatedFrames
 
 from .expression_compiler import is_cell, replace_n_with_a1, replace_n_with_a1_match
-from .formulas.spreadsheet_error import should_hide_errors_from_file
+from .spreadsheet_error import should_hide_errors_from_file
 
 if TYPE_CHECKING:
     from stack_data.core import FrameInfo

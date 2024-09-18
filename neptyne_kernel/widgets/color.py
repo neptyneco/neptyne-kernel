@@ -1,6 +1,9 @@
 from collections import namedtuple
 
-import matplotlib.colors as mcolors
+try:
+    import matplotlib.colors as mcolors
+except ImportError:
+    mcolors = None
 
 
 class Color(namedtuple("ColorBase", ["r", "g", "b"])):
@@ -14,6 +17,7 @@ class Color(namedtuple("ColorBase", ["r", "g", "b"])):
         elif (
             len(args) == 1
             and isinstance(args[0], str)
+            and mcolors is not None
             and (rgb := mcolors.CSS4_COLORS.get(args[0], args[0])).startswith("#")
         ):
             red, green, blue = Color.from_webcolor(rgb)

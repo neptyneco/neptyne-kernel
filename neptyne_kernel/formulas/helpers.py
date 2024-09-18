@@ -11,8 +11,8 @@ import roman
 from ..cell_range import CellRange
 from ..primitives import check_none
 from .boolean import BooleanValue
-from .spreadsheet_datetime import SpreadsheetDateTime
-from .spreadsheet_error import (
+from ..spreadsheet_datetime import SpreadsheetDateTime
+from ..spreadsheet_error import (
     NA_ERROR,
     NUM_ERROR,
     VALUE_ERROR,

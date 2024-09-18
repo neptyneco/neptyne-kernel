@@ -19,8 +19,8 @@ from .information import (
     TYPE,
     N,
 )
-from .spreadsheet_datetime import SpreadsheetDate
-from .spreadsheet_error import NA_ERROR, NULL_ERROR, REF_ERROR, VALUE_ERROR
+from ..spreadsheet_datetime import SpreadsheetDate
+from ..spreadsheet_error import NA_ERROR, NULL_ERROR, REF_ERROR, VALUE_ERROR
 
 
 @pytest.mark.parametrize(

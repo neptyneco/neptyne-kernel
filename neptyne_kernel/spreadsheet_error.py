@@ -5,7 +5,7 @@ from typing import Any
 
 from googleapiclient.errors import HttpError
 
-from ..neptyne_protocol import MIMETypes
+from .neptyne_protocol import MIMETypes
 
 UNSUPPORTED_TYPE_RE = re.compile(
     r"unsupported operand type\(s\) for ([^:]+): '(\w+)' and '(\w+)'"

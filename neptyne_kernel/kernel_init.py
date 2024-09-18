@@ -2,8 +2,7 @@ from IPython.core import interactiveshell as _interactiveshell
 from jedi.api import Interpreter as _jedi_Interpreter
 from stack_data.core import Source as _Source
 
-from neptyne_kernel.kernel_globals import core as _core_globals  # noqa: F401
-from neptyne_kernel.kernel_globals import gsheets as _gsheet_globals  # noqa: F401
+import neptyne_kernel.neptyne_api as _neptyne_api  # noqa: F401
 
 from .dash import Dash as _Dash
 

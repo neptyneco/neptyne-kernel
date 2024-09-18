@@ -14,7 +14,6 @@ from typing import Any, Callable, cast
 import numpy as np
 import pandas as pd
 import plotly.io as pio
-import shapely.wkt
 from IPython.core.ultratb import FormattedTB
 from PIL import Image
 from plotly.basedatatypes import BaseFigure
@@ -22,7 +21,7 @@ from plotly.basedatatypes import BaseFigure
 from .cell_address import CoordAddr
 from .datetime_conversions import datetime_to_serial
 from .download import Download
-from .formulas.spreadsheet_error import SpreadsheetError
+from .spreadsheet_error import SpreadsheetError
 from .mime_types import (
     BYTES_MIME_KEY,
     DATETIME_KEY,
@@ -113,11 +112,16 @@ MIME_TYPE_HANDLERS: dict[str, Callable] = {
     MIMETypes.APPLICATION_VND_NEPTYNE_ERROR_V1_JSON.value: SpreadsheetError.from_mime_type,
     MIMETypes.APPLICATION_VND_POPO_V1_JSON.value: decode_b64_pickled,
     PLOTLY_MIME_TYPE: lambda d: pio.from_json(json.dumps(d)),
-    WELL_KNOWN_TEXT_KEY: lambda x: shapely.wkt.loads(x),
     "image/png": image_from_b64,
     "image/gif": image_from_b64,
     "image/jpeg": image_from_b64,
 }
+
+try:
+    import shapely.wkt
+    MIME_TYPE_HANDLERS[WELL_KNOWN_TEXT_KEY] = lambda x: shapely.wkt.loads(x)
+except ImportError:
+    pass
 
 
 def maybe_format_common_values(val: Any) -> Any:

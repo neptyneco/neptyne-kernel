@@ -3,7 +3,6 @@ from numbers import Number
 from typing import Any, Iterator
 
 import numpy as np
-from scipy.ndimage import find_objects, label
 
 from ..cell_address import Address, Range
 from ..expression_compiler import is_cell_formula
@@ -99,6 +98,8 @@ def ai_tables_for_sheet(
     sheet_name: str,
     assume_filled: Range | None = None,
 ) -> Iterator[TableForAI]:
+    from scipy.ndimage import find_objects, label
+
     if not cells:
         return []
     sheet_id = next(iter(cells)).sheet

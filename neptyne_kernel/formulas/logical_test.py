@@ -2,7 +2,7 @@
 import pytest
 
 from .boolean import *  # noqa: F403
-from .spreadsheet_error import NA_ERROR, NULL_ERROR
+from ..spreadsheet_error import NA_ERROR, NULL_ERROR
 
 
 def test_IF():

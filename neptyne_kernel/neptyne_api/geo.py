@@ -14,7 +14,7 @@ from shapely import Point, transform
 from shapely.geometry.base import BaseGeometry
 
 from ..cell_range import CellRange, unproxy_for_dataframe
-from ..formulas.spreadsheet_error import UNSUPPORTED_ERROR, VALUE_ERROR
+from ..spreadsheet_error import UNSUPPORTED_ERROR, VALUE_ERROR
 
 
 def transform_coord_to_meters(center_lat, center_lng, args):

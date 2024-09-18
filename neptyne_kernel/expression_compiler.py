@@ -17,8 +17,6 @@ from token import (
 from tokenize import TokenError, tokenize, untokenize
 from typing import Any, Callable, Iterable
 
-import black
-import black.parsing
 import libcst as cst
 from libcst import matchers as cst_matchers
 from untokenize import untokenize as untokenize_with_whitespace
@@ -31,7 +29,7 @@ from .cell_address import (
     replace_negative_bounds_with_grid_size,
 )
 from .formula_names import FORMULA_NAMES
-from .formulas.spreadsheet_error import SheetDoesNotExist
+from .spreadsheet_error import SheetDoesNotExist
 from .neptyne_protocol import Dimension, WidgetRegistry
 from .transformation import Transformation
 
@@ -1022,7 +1020,7 @@ def compile_expression(
 
 
 def reformat_code(
-    code: str, line_length: int = black.DEFAULT_LINE_LENGTH
+    code: str, line_length: int | None = None
 ) -> tuple[str, bool]:
     """Reformat the code. Might raise a ValueError.
     Returns:
@@ -1030,6 +1028,12 @@ def reformat_code(
     Raises:
         ValueError when 'black' raises InvalidInput or TokenError
     """
+    try:
+        import black
+        import black.parsing
+    except ImportError:
+        raise ImportError("black is required to reformat")
+    line_length = line_length or black.DEFAULT_LINE_LENGTH
     try:
         code = black.format_cell(
             code,

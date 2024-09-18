@@ -42,7 +42,6 @@ import numpy as np
 import pandas as pd
 import plotly.io as pio
 import requests
-from croniter import croniter
 from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
 from ipykernel.inprocess.ipkernel import InProcessKernel
@@ -50,11 +49,8 @@ from ipykernel.kernelbase import Kernel
 from IPython import InteractiveShell
 from IPython.core.interactiveshell import ExecutionResult
 from jupyter_client.jsonutil import json_clean
-from matplotlib_inline import backend_inline
 from PIL import Image
 from plotly.basedatatypes import BaseFigure
-from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
-from shapely.geometry.point import Point as ShapelyPoint
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from . import gsheets_api, sheet_context, streamlit_server
@@ -88,9 +84,8 @@ from .expression_compiler import (
     tokenize_with_ranges,
     try_parse_capitalized_range,
 )
-from .formulas.sheets import SvgImage
-from .formulas.spreadsheet_datetime import SpreadsheetDateTimeBase
-from .formulas.spreadsheet_error import (
+from .spreadsheet_datetime import SpreadsheetDateTimeBase
+from .spreadsheet_error import (
     PYTHON_ERROR,
     SheetDoesNotExist,
     SpreadsheetError,
@@ -201,6 +196,22 @@ from .widgets.register_widget import (
     widget_name_from_code,
     widget_registry,
 )
+try:
+    from .formulas.sheets import SvgImage
+except ImportError:
+    SvgImage = None
+
+try:
+    from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
+    from shapely.geometry.point import Point as ShapelyPoint
+    _HAS_SHAPELY = True
+except ImportError:
+    _HAS_SHAPELY = False
+
+try:
+    from matplotlib_inline import backend_inline as matplotlib_backend_inline
+except ImportError:
+    matplotlib_backend_inline = None
 
 if TYPE_CHECKING:
     from .sheet_api import NeptyneSheet
@@ -277,6 +288,8 @@ class Cron:
     alert_email: str | None = None
 
     def next_execution_time_datetime(self, now: float) -> datetime.datetime:
+        from croniter import croniter
+
         cron = croniter(
             self.schedule, datetime.datetime.fromtimestamp(now, self.timezone)
         )
@@ -505,7 +518,11 @@ class Dash:
             ip.InteractiveTB.set_mode(mode="Context")
             ip.SyntaxTB = DashSyntaxTB(color_scheme="LightBG", parent=parent)
 
-            ip.run_line_magic("matplotlib", "inline")
+            try:
+                import matplotlib
+                ip.run_line_magic("matplotlib", "inline")
+            except ImportError:
+                pass
 
             ip.events.register("pre_execute", self.pre_execute)
             ip.events.register("post_execute", self.post_execute)
@@ -1067,7 +1084,7 @@ class Dash:
         with self.use_cell_id(address):
             if isinstance(value, bytes):
                 data = {BYTES_MIME_KEY: base64.b64encode(value).decode()}
-            elif isinstance(value, ShapelyBaseGeometry):
+            elif _HAS_SHAPELY and isinstance(value, ShapelyBaseGeometry):
                 render_inline = True
 
                 old_svg_method = value.svg
@@ -1082,7 +1099,7 @@ class Dash:
 
                     svg = re.sub(r'cx="([-\d.]+)"', move_left, svg)
 
-                    if isinstance(obj, ShapelyPoint):
+                    if _HAS_SHAPELY and isinstance(obj, ShapelyPoint):
                         transform = "scale(1,-1)"
                         svg += (
                             f'<text x="{obj.x - 0.6}" y="{-obj.y + 0.3}"'
@@ -1127,7 +1144,8 @@ class Dash:
 
             if render_inline:
                 data["__neptyne_meta__"] = {"inline": True}
-            if isinstance(value, Image.Image | SvgImage):
+            im_types = (Image.Image, SvgImage) if SvgImage is not None else Image.Image
+            if isinstance(value, im_types):
                 width = value.width
                 height = value.height
                 if width > 800 or height > 600:
@@ -2726,7 +2744,11 @@ class Dash:
                     + "\n\n"
                 )
 
-                import streamlit as _streamlit_module
+                try:
+                    import streamlit as _streamlit_module
+                except ImportError:
+                    print("Error: streamlit not found. Install streamlit to use nt.streamlit", file=sys.stderr)
+                    return
 
                 setattr(_streamlit_module, "_neptyne_dash", self)
 
@@ -2958,7 +2980,8 @@ class Dash:
             yield
         finally:
             # Flush any matplotlib messages
-            backend_inline.show(True)
+            if matplotlib_backend_inline:
+                matplotlib_backend_inline.show(True)
             self._cell_execution_stack.pop()
             self.shell.display_pub.unregister_hook(hook)
 

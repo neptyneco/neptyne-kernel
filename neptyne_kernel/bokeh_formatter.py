@@ -1,11 +1,14 @@
 from typing import Any
 
-from bokeh.embed import file_html
-from bokeh.plotting import figure
-from bokeh.resources import CDN
-
 
 def maybe_format_bokeh(value: Any) -> str | None:
+    try:
+        from bokeh.embed import file_html
+        from bokeh.plotting import figure
+        from bokeh.resources import CDN
+    except ImportError:
+        return None
+
     if not isinstance(value, figure):
         return None
     try:

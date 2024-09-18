@@ -34,7 +34,7 @@ from .lookup import (
     XMATCH,
 )
 from .mathtrig import *  # noqa: F403
-from .spreadsheet_error import CALC_ERROR, NA_ERROR, REF_ERROR, VALUE_ERROR
+from ..spreadsheet_error import CALC_ERROR, NA_ERROR, REF_ERROR, VALUE_ERROR
 
 TEST_LOOKUP_1 = CellRange([["world", "1", 2], ["hello", "3", 4]])
 

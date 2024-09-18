@@ -4,7 +4,7 @@ import pytest
 from ..cell_range import CellRange
 from .helpers import assert_equal
 from .mathtrig import *  # noqa: F403
-from .spreadsheet_error import *  # noqa: F403
+from ..spreadsheet_error import *  # noqa: F403
 from .stats import SUBTOTAL
 from .test_helpers import approx_or_error
 

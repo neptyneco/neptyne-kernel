@@ -1,7 +1,7 @@
 import collections.abc
 from typing import Any, Callable
 
-from ..formulas.spreadsheet_datetime import SpreadsheetDateTime
+from ..spreadsheet_datetime import SpreadsheetDateTime
 from ..widgets.register_widget import register_widget
 from .base_widget import (
     BaseWidget,

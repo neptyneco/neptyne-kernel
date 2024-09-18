@@ -26,7 +26,7 @@ from .helpers import (
     round_to_digits_func,
     sign,
 )
-from .spreadsheet_error import (
+from ..spreadsheet_error import (
     NA_ERROR,
     NUM_ERROR,
     VALUE_ERROR,

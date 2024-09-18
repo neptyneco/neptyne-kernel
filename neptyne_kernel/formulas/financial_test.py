@@ -62,7 +62,7 @@ from .financial import (
     YIELDDISC,
     YIELDMAT,
 )
-from .spreadsheet_datetime import SpreadsheetDate
+from ..spreadsheet_datetime import SpreadsheetDate
 
 
 @pytest.mark.parametrize(

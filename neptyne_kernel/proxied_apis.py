@@ -1,16 +1,12 @@
 import os
 import urllib.parse
-from asyncio import Task
 from collections import defaultdict
 from typing import Any, Callable
 
-import google.generativeai as genai
 import httpx
 import requests
-from aiohttp import ClientSession
 
 from .kernel_runtime import get_api_token, send_out_of_quota
-from .scoped import close_post_run_cell
 
 API_EXCEEDED_MESSAGE_PREFIX = "Neptyne API limit exceeded for service=["
 PLACEHOLDER_API_KEY = "NEPTYNE_PLACEHOLDER"
@@ -29,40 +25,6 @@ def get_api_error_service(error: str) -> str | None:
 
 def make_api_error_message(service: str) -> str:
     return f"{API_EXCEEDED_MESSAGE_PREFIX}{service}]"
-
-
-def httpx_client_factory(
-    get_token: Callable[[], str | None],
-) -> Callable[[], httpx.Client]:
-    def make_client() -> httpx.Client:
-        token = get_token()
-        if token is None:
-            raise ValueError("Unable to determine API token for OpenAI API")
-        headers = {TOKEN_HEADER_NAME: token}
-        return httpx.Client(headers=headers)
-
-    return make_client
-
-
-class ClosingAIOSession(ClientSession):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self._closing_task: Task | None = None
-
-    def close(self) -> None:  # type: ignore
-        if not self._closing_task:
-            self._closing_task = self._loop.create_task(super().close())
-
-
-class AIOSessionContext:
-    def __init__(self, get_token: Callable[[], str | None]):
-        self.get_token = get_token
-
-    def get(self) -> ClientSession:
-        token = self.get_token()
-        session = ClosingAIOSession(headers={TOKEN_HEADER_NAME: token})
-        close_post_run_cell(session)
-        return session
 
 
 def start_api_proxying() -> None:
@@ -196,7 +158,11 @@ def start_api_proxying() -> None:
         "https://generativelanguage.googleapis.com/",
         send_out_of_quota,
     )
-    genai.configure(
-        api_key=PLACEHOLDER_API_KEY,
-        transport="rest",
-    )
+    try:
+        import google.generativeai as genai
+        genai.configure(
+            api_key=PLACEHOLDER_API_KEY,
+            transport="rest",
+        )
+    except ImportError:
+        pass

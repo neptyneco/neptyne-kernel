@@ -4,8 +4,8 @@ import pytest
 
 from ..cell_range import CellRange
 from .boolean import FALSE, TRUE
-from .spreadsheet_datetime import SpreadsheetDate, SpreadsheetDateTime
-from .spreadsheet_error import NA_ERROR, VALUE_ERROR, SpreadsheetError
+from ..spreadsheet_datetime import SpreadsheetDate, SpreadsheetDateTime
+from ..spreadsheet_error import NA_ERROR, VALUE_ERROR, SpreadsheetError
 from .stats import T
 from .text import (
     ARRAYTOTEXT,

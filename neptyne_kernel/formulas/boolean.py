@@ -1,7 +1,7 @@
 import operator
 from typing import Any, Callable
 
-from .spreadsheet_error import NA_ERROR, SpreadsheetError
+from ..spreadsheet_error import NA_ERROR, SpreadsheetError
 
 __all__ = [
     "TRUE",

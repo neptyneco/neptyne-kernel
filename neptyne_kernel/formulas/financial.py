@@ -28,8 +28,8 @@ from .date_time_helpers import (
     last_day_of_month,
 )
 from .helpers import Numeric, _flatten_range, round_to_decimals, sign
-from .spreadsheet_datetime import SpreadsheetDate
-from .spreadsheet_error import NUM_ERROR, ZERO_DIV_ERROR
+from ..spreadsheet_datetime import SpreadsheetDate
+from ..spreadsheet_error import NUM_ERROR, ZERO_DIV_ERROR
 
 __all__ = [
     "ACCRINT",
@@ -437,7 +437,7 @@ def IPMT(
         return NUM_ERROR
 
     return pyxirr.ipmt(
-        rate, per, nper, pv, fv, pmt_at_begining=_type == PaymentDue.BeginningOfPeriod
+        rate, per, nper, pv, fv, pmt_at_beginning=_type == PaymentDue.BeginningOfPeriod
     )
 
 
@@ -506,7 +506,7 @@ def PPMT(
             nper,
             pv,
             fv,
-            pmt_at_begining=_type == PaymentDue.BeginningOfPeriod,
+            pmt_at_beginning=_type == PaymentDue.BeginningOfPeriod,
         )
 
 
@@ -838,7 +838,7 @@ def FV(
         return -(pv * fv_factor(rate, nper + pmt))
     else:
         return pyxirr.fv(
-            rate, nper, pmt, pv, pmt_at_begining=_type == PaymentDue.BeginningOfPeriod
+            rate, nper, pmt, pv, pmt_at_beginning=_type == PaymentDue.BeginningOfPeriod
         )
 
 
@@ -934,7 +934,7 @@ def NOMINAL(effect_rate: Numeric, npery: int) -> Numeric:
 def NPER(rate: Numeric, pmt: Numeric, pv, fv: Numeric = 0, _type: int = 0) -> Numeric:
     """Returns the number of periods for an investment"""
     return pyxirr.nper(
-        rate, pmt, pv, fv, pmt_at_begining=_type == PaymentDue.BeginningOfPeriod
+        rate, pmt, pv, fv, pmt_at_beginning=_type == PaymentDue.BeginningOfPeriod
     )
 
 
@@ -1301,7 +1301,7 @@ def PMT(
 ) -> Numeric:
     """Returns the periodic payment for an annuity"""
     return pyxirr.pmt(
-        rate, nper, pv, fv, pmt_at_begining=_type == PaymentDue.BeginningOfPeriod
+        rate, nper, pv, fv, pmt_at_beginning=_type == PaymentDue.BeginningOfPeriod
     )
 
 
@@ -1437,7 +1437,7 @@ def PV(
         return NUM_ERROR
 
     return pyxirr.pv(
-        rate, nper, pmt, fv, pmt_at_begining=_type == PaymentDue.BeginningOfPeriod
+        rate, nper, pmt, fv, pmt_at_beginning=_type == PaymentDue.BeginningOfPeriod
     )
 
 
@@ -1472,7 +1472,7 @@ def RATE(
         pmt,
         pv,
         fv,
-        pmt_at_begining=_type == PaymentDue.BeginningOfPeriod,
+        pmt_at_beginning=_type == PaymentDue.BeginningOfPeriod,
         guess=guess,
     )
 
