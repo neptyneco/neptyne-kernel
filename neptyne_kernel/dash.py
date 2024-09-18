@@ -35,6 +35,7 @@ from typing import (
     Sequence,
 )
 from unittest.mock import patch
+from urllib.parse import urlparse
 
 import dateutil.parser
 import dateutil.tz
@@ -48,7 +49,6 @@ from ipykernel.inprocess.ipkernel import InProcessKernel
 from ipykernel.kernelbase import Kernel
 from IPython import InteractiveShell
 from IPython.core.interactiveshell import ExecutionResult
-from jupyter_client.jsonutil import json_clean
 from PIL import Image
 from plotly.basedatatypes import BaseFigure
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -196,6 +196,11 @@ from .widgets.register_widget import (
     widget_name_from_code,
     widget_registry,
 )
+from .json_tools import json_clean
+
+import ipykernel
+IPYKERNEL_MAJOR_VERSION = int(ipykernel.__version__.split(".")[0])
+
 try:
     from .formulas.sheets import SvgImage
 except ImportError:
@@ -240,6 +245,10 @@ CLEAR_CELL_METADATA_CHANGE = "clear_cell_metadata_change"
 
 
 pio.templates.default = "plotly"
+
+
+def get_parent_shim(self: Kernel, channel:str | None=None):
+    return self._parent_header
 
 
 def check_max_col_for_address(item: Address) -> None:
@@ -507,16 +516,17 @@ class Dash:
 
         if ip is not None:
             parent = ip if isinstance(ip, InteractiveShell) else None
-            ip.InteractiveTB = DashAutoFormattedTB(
-                mode="Plain",
-                color_scheme="LightBG",
-                tb_offset=ip.InteractiveTB.tb_offset,
-                check_cache=ip.InteractiveTB.check_cache,
-                debugger_cls=ip.debugger_cls,
-                parent=parent,
-            )
-            ip.InteractiveTB.set_mode(mode="Context")
-            ip.SyntaxTB = DashSyntaxTB(color_scheme="LightBG", parent=parent)
+            if IPYKERNEL_MAJOR_VERSION >= 6:
+                ip.InteractiveTB = DashAutoFormattedTB(
+                    mode="Plain",
+                    color_scheme="LightBG",
+                    tb_offset=ip.InteractiveTB.tb_offset,
+                    check_cache=ip.InteractiveTB.check_cache,
+                    debugger_cls=ip.debugger_cls,
+                    parent=parent,
+                )
+                ip.InteractiveTB.set_mode(mode="Context")
+                ip.SyntaxTB = DashSyntaxTB(color_scheme="LightBG", parent=parent)
 
             try:
                 import matplotlib
@@ -528,10 +538,13 @@ class Dash:
             ip.events.register("post_execute", self.post_execute)
             ip.events.register("post_run_cell", self.post_run_cell)
 
-            ip.__class__.compiler_class = TyneCachingCompiler
-            ip.compile = ip.compiler_class()
+            if IPYKERNEL_MAJOR_VERSION >= 6:
+                ip.__class__.compiler_class = TyneCachingCompiler
+                ip.compile = ip.compiler_class()
 
             self.kernel = ip.kernel
+            if not hasattr(self.kernel, "get_parent"):
+                setattr(self.kernel, "get_parent", get_parent_shim.__get__(self.kernel, Kernel))
 
             self.patch_do_complete(self.kernel)
 
@@ -648,7 +661,10 @@ class Dash:
                 for frame in tb[1:]:
                     if frame.line == "N_.flush_side_effects()":
                         continue
-                    exec_count = self.shell.compile._filename_map.get(frame.filename)
+                    try:
+                        exec_count = self.shell.compile._filename_map.get(frame.filename)
+                    except AttributeError:
+                        exec_count = 1
                     if this_exec_count is None and exec_count is not None:
                         this_exec_count = exec_count
                     client_traceback.append(
@@ -1524,6 +1540,10 @@ class Dash:
         self.api_key = api_key
         self.api_host = api_host
 
+        api_host_host = urlparse(api_host).hostname
+        if api_host_host != "localhost":
+            os.environ["API_PROXY_HOST_PORT"] = f"api-proxy.{api_host_host}"
+
         api_token, gsheet_id = self.get_api_token()
 
         os.environ["NEPTYNE_API_TOKEN"] = api_token
@@ -2338,6 +2358,9 @@ class Dash:
             self.shell.run_cell("N_.flush_side_effects()")
             self.maybe_apply_on_value_change_rules()
             self.stop_start_streamlit()
+        except Exception as e:
+            print(e)
+            raise
         finally:
             Dash.in_post_execute_hook = False
 

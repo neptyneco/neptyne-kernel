@@ -9,13 +9,18 @@ from IPython.core.ultratb import (
     AutoFormattedTB,
     ListTB,
     SyntaxTB,
-    _format_filename,
 )
 from IPython.utils import py3compat
 from stack_data.core import RepeatedFrames
 
 from .expression_compiler import is_cell, replace_n_with_a1, replace_n_with_a1_match
 from .spreadsheet_error import should_hide_errors_from_file
+
+try:
+    from IPython.core.ultratb import _format_filename as format_filename
+except ImportError:
+    def format_filename(filename: str, filename_color: str, normal_color: str, lineno: int | None = None) -> str:
+        return filename
 
 if TYPE_CHECKING:
     from stack_data.core import FrameInfo
@@ -131,7 +136,7 @@ class DashAutoFormattedTB(AutoFormattedTB):
         for filename, lineno, name, line in extracted_list[:-1]:
             if not filename.startswith("<"):
                 continue
-            formatted_filename = _format_filename(
+            formatted_filename = format_filename(
                 filename, Colors.filename, Colors.Normal, lineno=lineno
             )
             items = [f"  {formatted_filename} in {Colors.name}{name}{Colors.Normal}\n"]
@@ -143,7 +148,7 @@ class DashAutoFormattedTB(AutoFormattedTB):
         filename, lineno, name, line = extracted_list[-1]
         if not filename.startswith("<"):
             return list[-1:]
-        formatted_filename = _format_filename(
+        formatted_filename = format_filename(
             filename, Colors.filenameEm, Colors.normalEm, lineno=lineno
         )
         items = [
@@ -190,7 +195,7 @@ class DashSyntaxTB(SyntaxTB):
                 lst.append(
                     "{}  {}{}\n".format(
                         Colors.normalEm,
-                        _format_filename(
+                        format_filename(
                             value.filename,
                             Colors.filenameEm,
                             Colors.normalEm,

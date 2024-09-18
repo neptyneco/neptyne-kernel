@@ -13,5 +13,6 @@ pydeck
 pygments
 pyflakes~=2.5.0
 pyjwt
+stack-data
 tokenize_rt
 untokenize

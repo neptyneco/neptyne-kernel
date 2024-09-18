@@ -65,7 +65,7 @@ def execute(to_execute: HttpRequest) -> dict[str, Any]:
     except RuntimeError:
         loop = None
 
-    if kernel and loop:
+    if not os.getenv("NEPTYNE_LOCAL_REPL") and kernel and loop:
         parent = kernel.shell.get_parent()
         future = loop.run_in_executor(None, do_execute, to_execute)
 
@@ -138,9 +138,15 @@ class ProxiedHttp(httplib2.Http):
     ) -> tuple[httplib2.Response, bytes]:
         if uri.startswith("https://sheets.googleapis.com"):
             host_port = os.getenv("API_PROXY_HOST_PORT", "localhost:8888")
+            if host_port.startswith("https://") or host_port.startswith("http://"):
+                protocol = ""
+            elif ":" in host_port:
+                protocol = "http://"
+            else:
+                protocol = "https://"
             uri = uri.replace(
                 "https://sheets.googleapis.com",
-                f"http://{host_port}/google_sheets_api",
+                f"{protocol}{host_port}/google_sheets_api",
             )
         res = super().request(uri, method, body, headers, redirections, connection_type)
 
