@@ -247,7 +247,7 @@ CLEAR_CELL_METADATA_CHANGE = "clear_cell_metadata_change"
 pio.templates.default = "plotly"
 
 
-def get_parent_shim(self: Kernel, channel:str | None=None):
+def get_parent_shim(self: Kernel, channel: str | None = None):
     return self._parent_header
 
 
@@ -530,6 +530,7 @@ class Dash:
 
             try:
                 import matplotlib
+
                 ip.run_line_magic("matplotlib", "inline")
             except ImportError:
                 pass
@@ -544,7 +545,11 @@ class Dash:
 
             self.kernel = ip.kernel
             if not hasattr(self.kernel, "get_parent"):
-                setattr(self.kernel, "get_parent", get_parent_shim.__get__(self.kernel, Kernel))
+                setattr(
+                    self.kernel,
+                    "get_parent",
+                    get_parent_shim.__get__(self.kernel, Kernel),
+                )
 
             self.patch_do_complete(self.kernel)
 
@@ -662,7 +667,9 @@ class Dash:
                     if frame.line == "N_.flush_side_effects()":
                         continue
                     try:
-                        exec_count = self.shell.compile._filename_map.get(frame.filename)
+                        exec_count = self.shell.compile._filename_map.get(
+                            frame.filename
+                        )
                     except AttributeError:
                         exec_count = 1
                     if this_exec_count is None and exec_count is not None:
@@ -1534,9 +1541,13 @@ class Dash:
 
     def initialize_local_kernel(self, api_key: str, api_host: str) -> None:
         if self.initialized:
-            raise ValueError(
+            print(
                 "Already initialized. If you need to connect to a different sheet, restart the kernel."
             )
+            print(
+                f"https://docs.google.com/spreadsheets/d/{self.gsheets_spreadsheet_id}"
+            )
+            return
         self.api_key = api_key
         self.api_host = api_host
 
@@ -1567,7 +1578,7 @@ class Dash:
         self.initialized = True
 
         print("Connected to Google Sheet:")
-        print(f"https://docs.google.com/spreadsheets/d/{gsheet_id}")
+        print(f"https://docs.google.com/spreadsheets/d/{self.gsheets_spreadsheet_id}")
 
     def __getitem__(
         self, item: CoordinateTuple | Address | Range
@@ -2770,7 +2781,10 @@ class Dash:
                 try:
                     import streamlit as _streamlit_module
                 except ImportError:
-                    print("Error: streamlit not found. Install streamlit to use nt.streamlit", file=sys.stderr)
+                    print(
+                        "Error: streamlit not found. Install streamlit to use nt.streamlit",
+                        file=sys.stderr,
+                    )
                     return
 
                 setattr(_streamlit_module, "_neptyne_dash", self)
