@@ -99,7 +99,9 @@ def json_encode(d: dict[str, Any]) -> bytes:
     try:
         import orjson
 
-        return orjson.dumps(d, default=neptyne_encode, option=orjson.OPT_SERIALIZE_NUMPY)
+        return orjson.dumps(
+            d, default=neptyne_encode, option=orjson.OPT_SERIALIZE_NUMPY
+        )
     except ImportError:
         import json
 

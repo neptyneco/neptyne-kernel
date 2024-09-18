@@ -1019,9 +1019,7 @@ def compile_expression(
     )
 
 
-def reformat_code(
-    code: str, line_length: int | None = None
-) -> tuple[str, bool]:
+def reformat_code(code: str, line_length: int | None = None) -> tuple[str, bool]:
     """Reformat the code. Might raise a ValueError.
     Returns:
         (code, is_modified) when 'black' succeeds (is_modified=True) or returns unchanged code (is_modified=False),

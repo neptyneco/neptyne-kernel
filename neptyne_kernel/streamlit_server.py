@@ -21,6 +21,7 @@ def start_server(
     main_script_path: str,
 ) -> None:
     from streamlit.web.server import Server
+
     if getattr(start_server, "server", None) is not None:
         raise RuntimeError("Server is already running")
 

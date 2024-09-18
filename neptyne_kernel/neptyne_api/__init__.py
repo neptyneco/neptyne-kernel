@@ -54,12 +54,14 @@ COMMON = [
 
 try:
     from . import data
+
     COMMON += ["data"]
 except ImportError:
     pass
 
 try:
     from . import geo
+
     COMMON += ["geo"]
 except ImportError:
     pass

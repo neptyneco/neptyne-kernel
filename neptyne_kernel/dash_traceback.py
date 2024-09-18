@@ -19,8 +19,12 @@ from .spreadsheet_error import should_hide_errors_from_file
 try:
     from IPython.core.ultratb import _format_filename as format_filename
 except ImportError:
-    def format_filename(filename: str, filename_color: str, normal_color: str, lineno: int | None = None) -> str:
+
+    def format_filename(
+        filename: str, filename_color: str, normal_color: str, lineno: int | None = None
+    ) -> str:
         return filename
+
 
 if TYPE_CHECKING:
     from stack_data.core import FrameInfo

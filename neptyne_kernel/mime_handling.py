@@ -119,6 +119,7 @@ MIME_TYPE_HANDLERS: dict[str, Callable] = {
 
 try:
     import shapely.wkt
+
     MIME_TYPE_HANDLERS[WELL_KNOWN_TEXT_KEY] = lambda x: shapely.wkt.loads(x)
 except ImportError:
     pass

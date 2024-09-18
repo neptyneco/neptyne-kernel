@@ -199,6 +199,7 @@ from .widgets.register_widget import (
 from .json_tools import json_clean
 
 import ipykernel
+
 IPYKERNEL_MAJOR_VERSION = int(ipykernel.__version__.split(".")[0])
 
 try:
@@ -209,6 +210,7 @@ except ImportError:
 try:
     from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
     from shapely.geometry.point import Point as ShapelyPoint
+
     _HAS_SHAPELY = True
 except ImportError:
     _HAS_SHAPELY = False

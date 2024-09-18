@@ -160,6 +160,7 @@ def start_api_proxying() -> None:
     )
     try:
         import google.generativeai as genai
+
         genai.configure(
             api_key=PLACEHOLDER_API_KEY,
             transport="rest",
