@@ -1,6 +1,6 @@
 [project]
 name = "neptyne-kernel"
-version = "0.1.8a1"
+version = "0.1.8a2"
 description = "The Neptyne kernel"
 readme = "README.md"
 authors = []
