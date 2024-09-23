@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Callable
 
-import markdown
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -635,6 +634,13 @@ class Markdown(OutputWidget, ColorMixins):
     text: str = widget_field("The text to display", default="")
 
     def render_widget(self) -> HTML:
+        try:
+            import markdown
+        except ImportError:
+            raise ValueError(
+                "You need to install the markdown package to use this widget"
+            )
+
         background_color = (
             self.background_color.webcolor if self.background_color else "#ffffff"
         )

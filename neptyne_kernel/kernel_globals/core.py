@@ -3,7 +3,7 @@
 # TODO: CellRange shouldn't be necesary here, but a bunch of tests rely on it
 from ..cell_range import CellRange
 from ..formulas import *
-from ..formulas.spreadsheet_error import (
+from ..spreadsheet_error import (
     NA_ERROR,
     NAME_ERROR,
     NULL_ERROR,

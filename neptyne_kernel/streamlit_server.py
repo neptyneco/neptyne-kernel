@@ -16,13 +16,12 @@
 
 import asyncio
 
-from streamlit.runtime.scriptrunner.script_run_context import get_script_run_ctx
-from streamlit.web.server import Server
-
 
 def start_server(
     main_script_path: str,
 ) -> None:
+    from streamlit.web.server import Server
+
     if getattr(start_server, "server", None) is not None:
         raise RuntimeError("Server is already running")
 
@@ -48,4 +47,8 @@ def is_server_running() -> bool:
 
 
 def is_running_in_streamlit() -> bool:
+    try:
+        from streamlit.runtime.scriptrunner.script_run_context import get_script_run_ctx
+    except ImportError:
+        return False
     return get_script_run_ctx(suppress_warning=True) is not None

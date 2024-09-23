@@ -2,7 +2,7 @@ import pytest
 
 from ..cell_range import CellRange
 from .helpers import assert_equal
-from .spreadsheet_error import VALUE_ERROR
+from ..spreadsheet_error import VALUE_ERROR
 from .web import ENCODEURL, FILTERXML, WEBSERVICE
 
 

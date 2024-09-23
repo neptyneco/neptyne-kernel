@@ -48,7 +48,7 @@ class NeptyneInt(int, NeptynePrimitive):
         return str(other) + str(self)
 
     def to_datetime(self) -> datetime:
-        from .formulas.spreadsheet_datetime import excel2datetime
+        from .spreadsheet_datetime import excel2datetime
 
         return excel2datetime(self)
 
@@ -79,7 +79,7 @@ class NeptyneFloat(float, NeptynePrimitive):
         return str(other) + str(self)
 
     def to_datetime(self) -> datetime:
-        from .formulas.spreadsheet_datetime import excel2datetime
+        from .spreadsheet_datetime import excel2datetime
 
         return excel2datetime(self)
 

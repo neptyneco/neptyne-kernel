@@ -56,7 +56,7 @@ from .engineering import (
     OCT2HEX,
     str2complex,
 )
-from .spreadsheet_error import NA_ERROR, NUM_ERROR, VALUE_ERROR
+from ..spreadsheet_error import NA_ERROR, NUM_ERROR, VALUE_ERROR
 from .test_helpers import approx_or_error
 
 

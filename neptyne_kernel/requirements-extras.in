@@ -1,0 +1,38 @@
+altair
+anthropic
+black
+bokeh
+bs4
+croniter
+db-dtypes
+descartes
+fastavro
+geopy
+google-generativeai
+graphlib
+html5lib
+json-fix
+mapboxgl
+mapclassify
+markdown
+matplotlib
+networkx
+openai
+openpyxl
+orjson
+qrcode
+reflex
+scikit-learn
+scipy
+seaborn
+tweepy
+streamlit~=1.36.0
+folium # ** geo.py
+feedparser # ** data.py
+geodatasets # ** geo.py
+geopandas # ** geo.py
+geoplot # ** geo.py
+google-cloud-bigquery # ** data.py
+google-cloud-bigquery-storage # ** data.py
+iexfinance # ** data.py
+lxml # ** web.py

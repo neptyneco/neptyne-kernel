@@ -1,6 +1,6 @@
 from pytest import approx
 
-from .spreadsheet_error import SpreadsheetError
+from ..spreadsheet_error import SpreadsheetError
 
 
 def approx_or_error(result):

@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING, Any, Callable, Optional
 from dateutil.parser import parse
 from zoneinfo import ZoneInfo
 
-from ..cell_api import CellApiMixin
-from ..primitives import Empty
+from .cell_api import CellApiMixin
+from .primitives import Empty
 from .spreadsheet_error import VALUE_ERROR, SpreadsheetError
 
 if TYPE_CHECKING:
-    from ..dash_ref import DashRef
+    from .dash_ref import DashRef
 
 SEC_IN_DAY = 86400
 MSEC_IN_DAY = SEC_IN_DAY * 1000

@@ -5,7 +5,7 @@ from requests import get
 from requests.exceptions import RequestException
 
 from ..cell_range import CellRange
-from .spreadsheet_error import VALUE_ERROR
+from ..spreadsheet_error import VALUE_ERROR
 
 __all__ = ["ENCODEURL", "FILTERXML", "WEBSERVICE"]
 

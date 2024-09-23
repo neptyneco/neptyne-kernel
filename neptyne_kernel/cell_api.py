@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 UNCONNECTED_MSG = " object not associated directly with a sheet"
 
 if TYPE_CHECKING:
-    from .formulas.spreadsheet_datetime import SpreadsheetDateTime
+    from .spreadsheet_datetime import SpreadsheetDateTime
 
 
 @dataclass
@@ -291,7 +291,7 @@ class CellApiMixin:
     def _get_event(self) -> CellEvent:
         from neptyne_kernel.kernel_runtime import get_user
 
-        from .formulas.spreadsheet_datetime import SpreadsheetDateTime
+        from .spreadsheet_datetime import SpreadsheetDateTime
 
         return CellEvent(self, get_user(), SpreadsheetDateTime())
 

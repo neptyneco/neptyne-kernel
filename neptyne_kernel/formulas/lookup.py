@@ -9,7 +9,7 @@ from ..cell_address import Address
 from ..cell_range import CellRange
 from .boolean import FALSE, TRUE, BooleanValue
 from .helpers import CellValue, SimpleCellValue, _flatten_range, search_wildcard
-from .spreadsheet_error import (
+from ..spreadsheet_error import (
     CALC_ERROR,
     NA_ERROR,
     REF_ERROR,

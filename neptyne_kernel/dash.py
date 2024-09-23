@@ -35,6 +35,7 @@ from typing import (
     Sequence,
 )
 from unittest.mock import patch
+from urllib.parse import urlparse
 
 import dateutil.parser
 import dateutil.tz
@@ -42,19 +43,14 @@ import numpy as np
 import pandas as pd
 import plotly.io as pio
 import requests
-from croniter import croniter
 from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
 from ipykernel.inprocess.ipkernel import InProcessKernel
 from ipykernel.kernelbase import Kernel
 from IPython import InteractiveShell
 from IPython.core.interactiveshell import ExecutionResult
-from jupyter_client.jsonutil import json_clean
-from matplotlib_inline import backend_inline
 from PIL import Image
 from plotly.basedatatypes import BaseFigure
-from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
-from shapely.geometry.point import Point as ShapelyPoint
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from . import gsheets_api, sheet_context, streamlit_server
@@ -88,9 +84,8 @@ from .expression_compiler import (
     tokenize_with_ranges,
     try_parse_capitalized_range,
 )
-from .formulas.sheets import SvgImage
-from .formulas.spreadsheet_datetime import SpreadsheetDateTimeBase
-from .formulas.spreadsheet_error import (
+from .spreadsheet_datetime import SpreadsheetDateTimeBase
+from .spreadsheet_error import (
     PYTHON_ERROR,
     SheetDoesNotExist,
     SpreadsheetError,
@@ -201,6 +196,29 @@ from .widgets.register_widget import (
     widget_name_from_code,
     widget_registry,
 )
+from .json_tools import json_clean
+
+import ipykernel
+
+IPYKERNEL_MAJOR_VERSION = int(ipykernel.__version__.split(".")[0])
+
+try:
+    from .formulas.sheets import SvgImage
+except ImportError:
+    SvgImage = None
+
+try:
+    from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
+    from shapely.geometry.point import Point as ShapelyPoint
+
+    _HAS_SHAPELY = True
+except ImportError:
+    _HAS_SHAPELY = False
+
+try:
+    from matplotlib_inline import backend_inline as matplotlib_backend_inline
+except ImportError:
+    matplotlib_backend_inline = None
 
 if TYPE_CHECKING:
     from .sheet_api import NeptyneSheet
@@ -229,6 +247,10 @@ CLEAR_CELL_METADATA_CHANGE = "clear_cell_metadata_change"
 
 
 pio.templates.default = "plotly"
+
+
+def get_parent_shim(self: Kernel, channel: str | None = None):
+    return self._parent_header
 
 
 def check_max_col_for_address(item: Address) -> None:
@@ -277,6 +299,8 @@ class Cron:
     alert_email: str | None = None
 
     def next_execution_time_datetime(self, now: float) -> datetime.datetime:
+        from croniter import croniter
+
         cron = croniter(
             self.schedule, datetime.datetime.fromtimestamp(now, self.timezone)
         )
@@ -494,27 +518,40 @@ class Dash:
 
         if ip is not None:
             parent = ip if isinstance(ip, InteractiveShell) else None
-            ip.InteractiveTB = DashAutoFormattedTB(
-                mode="Plain",
-                color_scheme="LightBG",
-                tb_offset=ip.InteractiveTB.tb_offset,
-                check_cache=ip.InteractiveTB.check_cache,
-                debugger_cls=ip.debugger_cls,
-                parent=parent,
-            )
-            ip.InteractiveTB.set_mode(mode="Context")
-            ip.SyntaxTB = DashSyntaxTB(color_scheme="LightBG", parent=parent)
+            if IPYKERNEL_MAJOR_VERSION >= 6:
+                ip.InteractiveTB = DashAutoFormattedTB(
+                    mode="Plain",
+                    color_scheme="LightBG",
+                    tb_offset=ip.InteractiveTB.tb_offset,
+                    check_cache=ip.InteractiveTB.check_cache,
+                    debugger_cls=ip.debugger_cls,
+                    parent=parent,
+                )
+                ip.InteractiveTB.set_mode(mode="Context")
+                ip.SyntaxTB = DashSyntaxTB(color_scheme="LightBG", parent=parent)
 
-            ip.run_line_magic("matplotlib", "inline")
+            try:
+                import matplotlib
+
+                ip.run_line_magic("matplotlib", "inline")
+            except ImportError:
+                pass
 
             ip.events.register("pre_execute", self.pre_execute)
             ip.events.register("post_execute", self.post_execute)
             ip.events.register("post_run_cell", self.post_run_cell)
 
-            ip.__class__.compiler_class = TyneCachingCompiler
-            ip.compile = ip.compiler_class()
+            if IPYKERNEL_MAJOR_VERSION >= 6:
+                ip.__class__.compiler_class = TyneCachingCompiler
+                ip.compile = ip.compiler_class()
 
             self.kernel = ip.kernel
+            if not hasattr(self.kernel, "get_parent"):
+                setattr(
+                    self.kernel,
+                    "get_parent",
+                    get_parent_shim.__get__(self.kernel, Kernel),
+                )
 
             self.patch_do_complete(self.kernel)
 
@@ -631,7 +668,12 @@ class Dash:
                 for frame in tb[1:]:
                     if frame.line == "N_.flush_side_effects()":
                         continue
-                    exec_count = self.shell.compile._filename_map.get(frame.filename)
+                    try:
+                        exec_count = self.shell.compile._filename_map.get(
+                            frame.filename
+                        )
+                    except AttributeError:
+                        exec_count = 1
                     if this_exec_count is None and exec_count is not None:
                         this_exec_count = exec_count
                     client_traceback.append(
@@ -1067,7 +1109,7 @@ class Dash:
         with self.use_cell_id(address):
             if isinstance(value, bytes):
                 data = {BYTES_MIME_KEY: base64.b64encode(value).decode()}
-            elif isinstance(value, ShapelyBaseGeometry):
+            elif _HAS_SHAPELY and isinstance(value, ShapelyBaseGeometry):
                 render_inline = True
 
                 old_svg_method = value.svg
@@ -1082,7 +1124,7 @@ class Dash:
 
                     svg = re.sub(r'cx="([-\d.]+)"', move_left, svg)
 
-                    if isinstance(obj, ShapelyPoint):
+                    if _HAS_SHAPELY and isinstance(obj, ShapelyPoint):
                         transform = "scale(1,-1)"
                         svg += (
                             f'<text x="{obj.x - 0.6}" y="{-obj.y + 0.3}"'
@@ -1127,7 +1169,8 @@ class Dash:
 
             if render_inline:
                 data["__neptyne_meta__"] = {"inline": True}
-            if isinstance(value, Image.Image | SvgImage):
+            im_types = (Image.Image, SvgImage) if SvgImage is not None else Image.Image
+            if isinstance(value, im_types):
                 width = value.width
                 height = value.height
                 if width > 800 or height > 600:
@@ -1500,11 +1543,19 @@ class Dash:
 
     def initialize_local_kernel(self, api_key: str, api_host: str) -> None:
         if self.initialized:
-            raise ValueError(
+            print(
                 "Already initialized. If you need to connect to a different sheet, restart the kernel."
             )
+            print(
+                f"https://docs.google.com/spreadsheets/d/{self.gsheets_spreadsheet_id}"
+            )
+            return
         self.api_key = api_key
         self.api_host = api_host
+
+        api_host_host = urlparse(api_host).hostname
+        if api_host_host != "localhost":
+            os.environ["API_PROXY_HOST_PORT"] = f"api-proxy.{api_host_host}"
 
         api_token, gsheet_id = self.get_api_token()
 
@@ -1529,7 +1580,7 @@ class Dash:
         self.initialized = True
 
         print("Connected to Google Sheet:")
-        print(f"https://docs.google.com/spreadsheets/d/{gsheet_id}")
+        print(f"https://docs.google.com/spreadsheets/d/{self.gsheets_spreadsheet_id}")
 
     def __getitem__(
         self, item: CoordinateTuple | Address | Range
@@ -2320,6 +2371,9 @@ class Dash:
             self.shell.run_cell("N_.flush_side_effects()")
             self.maybe_apply_on_value_change_rules()
             self.stop_start_streamlit()
+        except Exception as e:
+            print(e)
+            raise
         finally:
             Dash.in_post_execute_hook = False
 
@@ -2726,7 +2780,14 @@ class Dash:
                     + "\n\n"
                 )
 
-                import streamlit as _streamlit_module
+                try:
+                    import streamlit as _streamlit_module
+                except ImportError:
+                    print(
+                        "Error: streamlit not found. Install streamlit to use nt.streamlit",
+                        file=sys.stderr,
+                    )
+                    return
 
                 setattr(_streamlit_module, "_neptyne_dash", self)
 
@@ -2958,7 +3019,8 @@ class Dash:
             yield
         finally:
             # Flush any matplotlib messages
-            backend_inline.show(True)
+            if matplotlib_backend_inline:
+                matplotlib_backend_inline.show(True)
             self._cell_execution_stack.pop()
             self.shell.display_pub.unregister_hook(hook)
 
