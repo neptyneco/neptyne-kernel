@@ -571,6 +571,7 @@ class Dash:
         self.local_repl_mode = bool(os.getenv("NEPTYNE_LOCAL_REPL"))
         self.api_key = ""
         self.api_host = ""
+        self._google_credentials = None
 
     @classmethod
     def instance(cls) -> "Dash":
@@ -1527,7 +1528,26 @@ class Dash:
 
         return address
 
+    def initialize_colab(self, gsheet_id: str | None = None) -> None:
+        from google.colab import auth
+        from google.auth import default
+
+        auth.authenticate_user()
+        self._google_credentials = default()
+
+        if gsheet_id is None:
+            gsheet_id = input("Enter Google Sheet ID: ")
+
+        self.initialize_for_gsheet(gsheet_id)
+
     def initialize_interactive(self) -> None:
+        try:
+            from google.colab import auth
+
+            self.initialize_colab()
+            return
+        except ImportError:
+            pass
         api_key = input("Enter API key: ")
         self.initialize_local_kernel(api_key, "https://app.neptyne.com")
 
@@ -1544,14 +1564,6 @@ class Dash:
         return api_token, gsheet_id
 
     def initialize_local_kernel(self, api_key: str, api_host: str) -> None:
-        if self.initialized:
-            print(
-                "Already initialized. If you need to connect to a different sheet, restart the kernel."
-            )
-            print(
-                f"https://docs.google.com/spreadsheets/d/{self.gsheets_spreadsheet_id}"
-            )
-            return
         self.api_key = api_key
         self.api_host = api_host
 
@@ -1562,8 +1574,18 @@ class Dash:
             os.environ["API_PROXY_HOST_PORT"] = f"api-proxy.{api_host_host}"
 
         api_token, gsheet_id = self.get_api_token()
-
         os.environ["NEPTYNE_API_TOKEN"] = api_token
+        self.initialize_for_gsheet(gsheet_id)
+
+    def initialize_for_gsheet(self, gsheet_id: str) -> None:
+        if self.initialized:
+            print(
+                "Already initialized. If you need to connect to a different sheet, restart the kernel."
+            )
+            print(
+                f"https://docs.google.com/spreadsheets/d/{self.gsheets_spreadsheet_id}"
+            )
+            return
         self.initialize_phase_1_decoded(
             InitPhase1Payload(
                 in_gs_mode=True,
@@ -3138,11 +3160,15 @@ class Dash:
         if self._gsheet_service is None:
             if not self.gsheets_spreadsheet_id:
                 raise ValueError("This tyne is not connected to a Google Sheet")
+            if self._google_credentials:
+                params = {"credentials": self._google_credentials}
+            else:
+                params = {"http":gsheets_api.ProxiedHttp()}
             self._gsheet_service = build(
                 "sheets",
                 "v4",
-                http=gsheets_api.ProxiedHttp(),
                 requestBuilder=gsheets_api.request_builder(gsheets_api.Credentials()),
+                **params,
             )
 
         return self._gsheet_service
