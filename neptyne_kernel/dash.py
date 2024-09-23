@@ -1602,7 +1602,7 @@ class Dash:
                 requires_recompile=False,
             )
         )
-        asyncio.run(self.listen_for_py_executes(api_host))
+        asyncio.run(self.listen_for_py_executes(api_host, api_token))
 
         self.initialized = True
 
