@@ -18,7 +18,8 @@ def init_notebook(api_key: str = "", api_host: str = "https://app.neptyne.com") 
         nt.connect_kernel(api_key, api_host)
 
 def init_colab(gsheet_id: str) -> None:
+    _init_kernel()
+
     import neptyne as nt
 
-    _init_kernel()
     nt.connect_colab(gsheet_id)
