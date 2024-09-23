@@ -3163,7 +3163,7 @@ class Dash:
             self._gsheet_service = build(
                 "sheets",
                 "v4",
-                requestBuilder=gsheets_api.request_builder(gsheets_api.Credentials()),
+                requestBuilder=gsheets_api.request_builder(self._google_credentials or gsheets_api.Credentials()),
                 **params,
             )
 
