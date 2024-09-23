@@ -13,6 +13,23 @@ def pythonpath_with_kernel_module() -> str:
     return str(kernel_module_path)
 
 
+def compile_jupyter(lines: list[str]) -> list[str]:
+    result = compile_src("\n".join(lines))
+
+    return [f"{lines}\n" for lines in result.split("\n")]
+
+
+def compile_src(src: str) -> str:
+    from neptyne_kernel.expression_compiler import compile_expression
+
+    if not src.strip():
+        return "\n"
+    result = compile_expression(
+        src, compute_cells_mentioned=False, reformat_compiled_code=False
+    ).compiled_code
+    return result
+
+
 class Kernel(IPythonKernel):
     def finish_metadata(
         self, parent: dict, metadata: dict, reply_content: dict
@@ -37,22 +54,12 @@ class Kernel(IPythonKernel):
         **kwargs: Any,
     ) -> dict:
         if bool(os.getenv("NEPTYNE_LOCAL_REPL")):
-            code = "".join(self._compile_src(code))
+            code = "".join(compile_src(code))
         return await super().do_execute(
             code,
             *args,
             **kwargs,
         )
-
-    def _compile_src(self, src: str) -> str:
-        from neptyne_kernel.expression_compiler import compile_expression
-
-        if not src.strip():
-            return "\n"
-        result = compile_expression(
-            src, compute_cells_mentioned=False, reformat_compiled_code=False
-        ).compiled_code
-        return result
 
 
 def kernel_main() -> None:

@@ -1,4 +1,3 @@
-import qrcode
 from PIL import Image
 from plotly.basedatatypes import BaseFigure
 
@@ -20,6 +19,13 @@ def qr_for_url(
     :param color: The color of the QR code
 
     :return: The QR code as a PIL Image"""
+    try:
+        import qrcode
+    except ImportError:
+        raise ImportError(
+            "The qrcode package is required to generate QR codes. "
+            "Please install it by running `pip install qrcode`."
+        )
     box_size = size // 21
     border_size = size * 0.01
 

@@ -2,7 +2,7 @@ from datetime import date, datetime, time
 
 
 def datetime_to_serial(dt: datetime | date | time) -> float:
-    from .formulas.spreadsheet_datetime import EPOCH_FIRST_YEAR, SpreadsheetDateTime
+    from .spreadsheet_datetime import EPOCH_FIRST_YEAR, SpreadsheetDateTime
 
     if isinstance(dt, time):
         dt = datetime.combine(

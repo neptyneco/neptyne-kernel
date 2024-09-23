@@ -1,12 +1,12 @@
 [project]
 name = "neptyne-kernel"
-version = "0.1.6"
+version = "0.1.8"
 description = "The Neptyne kernel"
 readme = "README.md"
 authors = []
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 classifiers = ["License :: OSI Approved :: MIT License"]
-dynamic = ["dependencies"]
+dynamic = ["dependencies", "optional-dependencies"]
 [build-system]
 requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
@@ -15,6 +15,8 @@ Homepage = "https://neptyne.com"
 Documentation = "https://docs.neptyne.com"
 Repository = "https://github.com/neptyneco/neptyne-kernel.git"
 [tool.setuptools.dynamic]
-dependencies = { file = ["kernel/requirements.txt"] }
+dependencies = { file = ["neptyne_kernel/requirements.in"] }
+optional-dependencies.extras = { file = ["neptyne_kernel/requirements-extras.in"] }
+optional-dependencies.formulas = { file = ["neptyne_kernel/requirements-formulas.in"] }
 [tool.setuptools.package-data]
 neptyne_kernel = ["kernel_spec/neptyne/kernel.json"]

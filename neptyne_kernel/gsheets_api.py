@@ -16,9 +16,7 @@ import pandas as pd
 from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
 from googleapiclient.http import HttpRequest
-from gspread import Cell
 from IPython import get_ipython
-from streamlit.platform import post_parent_message
 
 from . import sheet_context, streamlit_server
 from .api_ref import ApiRef
@@ -27,12 +25,12 @@ from .cell_api import CellApiMixin
 from .cell_range import CellRange, IntOrSlice, slice_or_int_to_range
 from .dash_traceback import CoordinateTuple
 from .datetime_conversions import datetime_to_serial
-from .formulas.spreadsheet_datetime import excel2datetime
-from .formulas.spreadsheet_error import GSheetError, GSheetNotAuthorized
+from .spreadsheet_datetime import excel2datetime
 from .kernel_runtime import get_api_token
 from .neptyne_protocol import CellAttribute, Dimension, SheetTransform
 from .primitives import proxy_val
 from .proxied_apis import NEEDS_GSHEET_ADVANCED_FEATURES_HTTP_CODE, TOKEN_HEADER_NAME
+from .spreadsheet_error import GSheetError, GSheetNotAuthorized
 from .util import list_like
 from .widgets.color import Color
 
@@ -43,6 +41,8 @@ def do_execute(to_execute: HttpRequest) -> dict[str, Any]:
     except HttpError as e:
         if e.resp.status == NEEDS_GSHEET_ADVANCED_FEATURES_HTTP_CODE:
             if streamlit_server.is_running_in_streamlit():
+                from streamlit.platform import post_parent_message
+
                 post_parent_message(json.dumps({"type": "gsheet_not_authorized"}))
             raise GSheetNotAuthorized(
                 "To use this feature, you need to enable advanced features. "
@@ -65,7 +65,7 @@ def execute(to_execute: HttpRequest) -> dict[str, Any]:
     except RuntimeError:
         loop = None
 
-    if kernel and loop:
+    if not os.getenv("NEPTYNE_LOCAL_REPL") and kernel and loop:
         parent = kernel.shell.get_parent()
         future = loop.run_in_executor(None, do_execute, to_execute)
 
@@ -138,9 +138,15 @@ class ProxiedHttp(httplib2.Http):
     ) -> tuple[httplib2.Response, bytes]:
         if uri.startswith("https://sheets.googleapis.com"):
             host_port = os.getenv("API_PROXY_HOST_PORT", "localhost:8888")
+            if host_port.startswith("https://") or host_port.startswith("http://"):
+                protocol = ""
+            elif ":" in host_port:
+                protocol = "http://"
+            else:
+                protocol = "https://"
             uri = uri.replace(
                 "https://sheets.googleapis.com",
-                f"http://{host_port}/google_sheets_api",
+                f"{protocol}{host_port}/google_sheets_api",
             )
         res = super().request(uri, method, body, headers, redirections, connection_type)
 
@@ -156,13 +162,6 @@ def request_builder(credentials: Credentials) -> Callable[..., HttpRequest]:
         return HttpRequest(new_http, *args, **kwargs)
 
     return build_request
-
-
-def cell_to_value(cell: Cell) -> float | str | int | None:
-    if cell.numeric_value is not None:
-        return cell.numeric_value
-    else:
-        return cell.value
 
 
 def sheets_for_spreadsheet(service: Resource, spreadsheet_id: str) -> list[dict]:

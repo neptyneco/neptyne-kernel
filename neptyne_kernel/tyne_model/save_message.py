@@ -4,7 +4,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
 
-import orjson
 
 from ..cell_address import Address
 from ..primitives import Empty
@@ -97,7 +96,16 @@ def tyne_content_dict(
 
 
 def json_encode(d: dict[str, Any]) -> bytes:
-    return orjson.dumps(d, default=neptyne_encode, option=orjson.OPT_SERIALIZE_NUMPY)
+    try:
+        import orjson
+
+        return orjson.dumps(
+            d, default=neptyne_encode, option=orjson.OPT_SERIALIZE_NUMPY
+        )
+    except ImportError:
+        import json
+
+        return json.dumps(d, default=neptyne_encode).encode("utf-8")
 
 
 @dataclass

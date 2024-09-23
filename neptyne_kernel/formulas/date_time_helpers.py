@@ -8,13 +8,13 @@ from dateutil.parser import ParserError
 from dateutil.relativedelta import relativedelta
 
 from .helpers import Numeric, _flatten_range
-from .spreadsheet_datetime import (
+from ..spreadsheet_datetime import (
     SpreadsheetDate,
     SpreadsheetDateTime,
     excel2date,
     excel2datetime,
 )
-from .spreadsheet_error import VALUE_ERROR, SpreadsheetError
+from ..spreadsheet_error import VALUE_ERROR, SpreadsheetError
 
 BaseType = int | float | str
 DateTimeValue = BaseType | SpreadsheetDateTime

@@ -1,8 +1,6 @@
 from inspect import getmembers, isclass, isfunction
 from types import ModuleType
 
-from . import formulas
-
 
 def _get_names_from_module(obj: ModuleType, prefix: str = "") -> set[str]:
     result = {
@@ -17,4 +15,10 @@ def _get_names_from_module(obj: ModuleType, prefix: str = "") -> set[str]:
     return result
 
 
-FORMULA_NAMES: set[str] = _get_names_from_module(formulas)
+FORMULA_NAMES: set[str]
+try:
+    from . import formulas
+
+    FORMULA_NAMES = _get_names_from_module(formulas)
+except ImportError:
+    FORMULA_NAMES = set()

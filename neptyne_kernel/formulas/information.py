@@ -4,8 +4,8 @@ from ..cell_address import format_cell
 from ..cell_range import CellRange, CellRangeList, CellRangeRef
 from .boolean import BooleanValue
 from .helpers import CellValue, Numeric, SimpleCellValue
-from .spreadsheet_datetime import SpreadsheetDate, SpreadsheetDateTime, SpreadsheetTime
-from .spreadsheet_error import (
+from ..spreadsheet_datetime import SpreadsheetDate, SpreadsheetDateTime, SpreadsheetTime
+from ..spreadsheet_error import (
     GETTING_DATA_ERROR,
     NA_ERROR,
     NAME_ERROR,

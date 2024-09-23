@@ -26,10 +26,8 @@ from typing import (
     TypeVar,
 )
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
-from shapely.geometry.base import BaseGeometry
 
 from .api_ref import ApiRef, Int, IntOrSlice, shape, slice_or_int_to_range
 from .cell_address import Address, Range
@@ -48,6 +46,7 @@ if TYPE_CHECKING:
     from .dash_ref import DashRef
     from .formulas.helpers import SimpleCellValue
     from .gsheets_api import GSheetRef
+    from geopandas import GeoDataFrame
 
 
 T = TypeVar("T")
@@ -626,8 +625,15 @@ class CellRange(Sequence):
 
     def to_geodataframe(
         self, header: bool = True, crs: str = "epsg:4326"
-    ) -> gpd.GeoDataFrame:
+    ) -> "GeoDataFrame":
         """@private"""
+        try:
+            import geopandas as gpd
+            from shapely.geometry.base import BaseGeometry
+        except ImportError:
+            raise ImportError(
+                "Geopandas is not installed. Please install it using 'pip install geopandas'"
+            )
         df = self.to_dataframe(header=header)
         geom_col = next(
             (
@@ -951,13 +957,13 @@ class CellRangeGSheet(CellRangeList, CellApiMixin):
         if isinstance(init_value, CellRange):
             super().__init__(init_value)
         else:
-            self.gspread_ref = init_value
+            self.gsheet_ref = init_value
             super().__init__(init_value.values)
             self.two_dimensional = init_value.range.dimensions() > 1
 
     @property
     def ref(self) -> ApiRef:  # type: ignore
-        return self.gspread_ref
+        return self.gsheet_ref
 
     @property
     def range(self) -> Range:
@@ -968,9 +974,9 @@ class CellRangeGSheet(CellRangeList, CellApiMixin):
             for row_idx, row in enumerate(self._values):
                 min_row = self.ref.range.min_row + row_idx
                 yield CellRangeGSheet(
-                    self.gspread_ref.with_range(
+                    self.gsheet_ref.with_range(
                         replace(
-                            self.gspread_ref.range, min_row=min_row, max_row=min_row
+                            self.gsheet_ref.range, min_row=min_row, max_row=min_row
                         ),
                         [*row],
                     )
@@ -983,7 +989,7 @@ class CellRangeGSheet(CellRangeList, CellApiMixin):
                     self.range.min_row + (idx if not horizontal else 0),
                     0,
                 )
-                yield self.gspread_ref.with_value(address, val)
+                yield self.gsheet_ref.with_value(address, val)
 
     def __setitem__(
         self, key: tuple[IntOrSlice, IntOrSlice] | IntOrSlice | str, value: Any
@@ -1032,15 +1038,15 @@ class CellRangeGSheet(CellRangeList, CellApiMixin):
         from .gsheets_api import insert_delete_row_column
 
         return insert_delete_row_column(
-            self.gspread_ref.service,
-            self.gspread_ref.spreadsheet_id,
-            self.gspread_ref.range,
+            self.gsheet_ref.service,
+            self.gsheet_ref.spreadsheet_id,
+            self.gsheet_ref.range,
             dimension,
             transform,
             index,
             amount,
             data,
-            self.gspread_ref.sheet_prefix,
+            self.gsheet_ref.sheet_prefix,
         )
 
 

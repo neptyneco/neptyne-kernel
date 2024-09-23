@@ -7,7 +7,7 @@ import requests
 from google.api_core.exceptions import GoogleAPICallError
 from iexfinance.stocks import Stock
 
-from ..formulas.spreadsheet_error import VALUE_ERROR
+from ..spreadsheet_error import VALUE_ERROR
 
 
 def json(url_or_str: str) -> pd.DataFrame:

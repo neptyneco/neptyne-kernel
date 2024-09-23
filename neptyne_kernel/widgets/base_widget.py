@@ -11,7 +11,10 @@ from dataclasses import MISSING, Field, dataclass, field, fields
 from enum import Enum
 from typing import Any, Callable
 
-import json_fix  # pylint: disable=unused-import # noqa: F401
+try:
+    import json_fix  # pylint: disable=unused-import # noqa: F401
+except ImportError:
+    pass
 
 from ..cell_api import CellApiMixin, CellEvent
 from ..neptyne_protocol import MIMETypes

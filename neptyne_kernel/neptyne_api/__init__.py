@@ -7,7 +7,7 @@ import sys
 
 from ..dash import Dash
 from ..gsheets_api import Formula
-from . import ai, cell_range, data, email, formatting, geo, google, sheet
+from . import ai, cell_range, email, formatting, google, sheet
 from .caching import cache
 from .cron import daily, weekly
 from .deprecated import send_owner_email
@@ -51,6 +51,20 @@ COMMON = [
     "api_function",
     "connect_kernel",
 ]
+
+try:
+    from . import data
+
+    COMMON += ["data"]
+except ImportError:
+    pass
+
+try:
+    from . import geo
+
+    COMMON += ["geo"]
+except ImportError:
+    pass
 
 CORE = [
     "datetime_to_serial",

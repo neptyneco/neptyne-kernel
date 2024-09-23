@@ -6,3 +6,6 @@ venv
 build/
 dist/
 *.egg-info/
+
+.idea
+.ipynb_checkpoints

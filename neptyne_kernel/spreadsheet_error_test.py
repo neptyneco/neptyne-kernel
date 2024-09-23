@@ -2,8 +2,8 @@ import sys
 
 import pytest
 
-from ..neptyne_protocol import MIMETypes
-from ..primitives import NeptyneStr
+from .neptyne_protocol import MIMETypes
+from .primitives import NeptyneStr
 from .spreadsheet_error import (
     NAME_ERROR,
     PYTHON_ERROR,

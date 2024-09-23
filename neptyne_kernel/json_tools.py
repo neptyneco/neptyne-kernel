@@ -2,15 +2,25 @@ import gzip
 import json
 from typing import Any
 
-from jupyter_client.jsonutil import json_clean
-from jupyter_client.jsonutil import json_default as jupyter_json_default
-
 from .primitives import Empty
+
+
+def json_clean(obj: Any) -> dict:
+    try:
+        from jupyter_client.jsonutil import json_clean
+    except ImportError:
+        from ipykernel.jsonutil import json_clean
+    return json_clean(obj)
 
 
 def json_default(obj: Any) -> str | int | list | float | None:
     if isinstance(obj, Empty):
         return None
+    try:
+        from jupyter_client.jsonutil import json_default as jupyter_json_default
+    except ImportError:
+        from jupyter_client.jsonutil import date_default as jupyter_json_default
+
     return jupyter_json_default(obj)
 
 

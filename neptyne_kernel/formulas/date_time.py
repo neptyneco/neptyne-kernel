@@ -18,7 +18,7 @@ from .date_time_helpers import (
     date_diff360eu,
     date_diff360us,
 )
-from .spreadsheet_datetime import (
+from ..spreadsheet_datetime import (
     EPOCH_FIRST_YEAR,
     SEC_IN_HOUR,
     SpreadsheetDate,
@@ -26,7 +26,7 @@ from .spreadsheet_datetime import (
     SpreadsheetTime,
     timedelta,
 )
-from .spreadsheet_error import NUM_ERROR, VALUE_ERROR, SpreadsheetError
+from ..spreadsheet_error import NUM_ERROR, VALUE_ERROR, SpreadsheetError
 
 __all__ = [
     "DATE",
