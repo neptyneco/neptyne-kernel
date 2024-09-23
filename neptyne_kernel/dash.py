@@ -1533,7 +1533,7 @@ class Dash:
         from google.auth import default
 
         auth.authenticate_user()
-        self._google_credentials = default()
+        self._google_credentials, _ = default()
 
         if gsheet_id is None:
             gsheet_id = input("Enter Google Sheet ID: ")
