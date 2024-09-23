@@ -199,6 +199,7 @@ from .widgets.register_widget import (
 from .json_tools import json_clean
 
 import ipykernel
+import websockets
 
 IPYKERNEL_MAJOR_VERSION = int(ipykernel.__version__.split(".")[0])
 
@@ -1541,6 +1542,29 @@ class Dash:
         gsheet_id = payload["gsheet_id"]
         return api_token, gsheet_id
 
+    async def listen_for_py_executes(self, api_host: str, api_token: str) -> None:
+        try:
+            websocket_url = f"ws://{api_host}/ws/0/nks/runpy/{api_token}"
+            async with websockets.connect(websocket_url) as websocket:
+                await websocket.send(json.dumps({"api_key": self.api_key, "action": "authenticate"}))
+
+                while True:
+                    message = await websocket.recv()
+                    data = json.loads(message)
+
+                    if data.get("action") == "run":
+                        code = data.get("code")
+                        if code:
+                            try:
+                                value = eval(
+                                    code, self.shell.user_global_ns, self.shell.user_ns
+                                )
+                                await websocket.send(json.dumps({"result": str(value), "token": data.get("token")}))
+                            except Exception as e:
+                                await websocket.send(json.dumps({"error": str(e), "token": data.get("token")}))
+        except Exception as e:
+            self.py_error = e
+
     def initialize_local_kernel(self, api_key: str, api_host: str) -> None:
         if self.initialized:
             print(
@@ -1552,6 +1576,7 @@ class Dash:
             return
         self.api_key = api_key
         self.api_host = api_host
+        self.py_error = None
 
         api_host_host = urlparse(api_host).hostname
         if api_host_host != "localhost":
@@ -1577,6 +1602,8 @@ class Dash:
                 requires_recompile=False,
             )
         )
+        asyncio.run(self.listen_for_py_executes(api_host))
+
         self.initialized = True
 
         print("Connected to Google Sheet:")
