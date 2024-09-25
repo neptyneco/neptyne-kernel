@@ -3163,8 +3163,11 @@ class Dash:
             if self._google_credentials:
                 params = {"credentials": self._google_credentials}
             else:
-                params = {"http":gsheets_api.ProxiedHttp(),
-                          "requestBuilder": gsheets_api.request_builder(gsheets_api.Credentials()),
+                params = {
+                    "http": gsheets_api.ProxiedHttp(),
+                    "requestBuilder": gsheets_api.request_builder(
+                        gsheets_api.Credentials()
+                    ),
                 }
             self._gsheet_service = build(
                 "sheets",
