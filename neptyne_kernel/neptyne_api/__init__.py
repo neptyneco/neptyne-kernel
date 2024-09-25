@@ -14,7 +14,7 @@ from .deprecated import send_owner_email
 from .events import do_events, get_mutex
 from .hooks import api_function, on_range_change, on_value_change
 from .images import qr_for_url, url_for_image
-from .local_kernels import connect_kernel
+from .local_kernels import connect_kernel, connect_colab
 from .secrets import get_secret, get_secrets
 from .streamlit_decorator import streamlit
 from .ui import alert, confetti, navigate_to
@@ -50,6 +50,7 @@ COMMON = [
     "url_for_image",
     "api_function",
     "connect_kernel",
+    "connect_colab",
 ]
 
 try:
