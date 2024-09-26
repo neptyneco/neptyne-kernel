@@ -1542,26 +1542,35 @@ class Dash:
         gsheet_id = payload["gsheet_id"]
         return api_token, gsheet_id
 
-    async def listen_for_py_executes(self, api_host: str, api_token: str) -> None:
+    async def listen_for_py_executes(self, api_host: str, api_key: str) -> None:
         try:
-            websocket_url = f"ws://{api_host}/ws/0/nks/runpy/{api_token}"
+            parsed = urlparse(api_host)
+            websocket_protocol = "wss" if parsed.scheme == "https" else "ws"
+            websocket_url = f"{websocket_protocol}://{parsed.hostname}/ws/0/nks/runpy/{api_key}"
             async with websockets.connect(websocket_url) as websocket:
-                await websocket.send(json.dumps({"api_key": self.api_key, "action": "authenticate"}))
-
                 while True:
                     message = await websocket.recv()
                     data = json.loads(message)
 
                     if data.get("action") == "run":
-                        code = data.get("code")
+                        token = data['token']
+                        code = data["code"]
                         if code:
                             try:
                                 value = eval(
                                     code, self.shell.user_global_ns, self.shell.user_ns
                                 )
-                                await websocket.send(json.dumps({"result": str(value), "token": data.get("token")}))
-                            except Exception as e:
-                                await websocket.send(json.dumps({"error": str(e), "token": data.get("token")}))
+                                if callable(value):
+                                    value = value()
+                            except Exception:
+                                etype, evalue, tb = sys.exc_info()
+                                value = gsheet_spreadsheet_error_from_python_exception(
+                                    etype, evalue, tb
+                                )
+                        _content_type, encoded = encode_for_gsheets(value)
+                        payload = {"result": json.loads(encoded), "token": token}
+                        await websocket.send(json.dumps(payload))
+
         except Exception as e:
             self.py_error = e
 
@@ -1602,7 +1611,8 @@ class Dash:
                 requires_recompile=False,
             )
         )
-        asyncio.run(self.listen_for_py_executes(api_host, api_token))
+        loop = asyncio.get_running_loop()
+        loop.create_task(self.listen_for_py_executes(api_host, api_key))
 
         self.initialized = True
 
