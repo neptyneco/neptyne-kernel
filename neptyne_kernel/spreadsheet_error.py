@@ -1,7 +1,7 @@
 import os
 import re
 from dataclasses import dataclass, fields, replace
-from typing import Any
+from typing import Any, Iterable
 
 from googleapiclient.errors import HttpError
 
@@ -47,7 +47,7 @@ def parse_unsupported_type_exception(msg: str) -> None | tuple[str, str, str]:
     m = UNSUPPORTED_TYPE_RE.match(msg)
     if not m:
         return None
-    return m.groups()
+    return m.groups()  # type: ignore
 
 
 def analyze_type_error(error: TypeError) -> str | None:
@@ -74,7 +74,9 @@ class SpreadsheetError:
     traceback: list | None = None
     line_number: int | None = None
 
-    def _repr_mimebundle_(self, include=False, exclude=False, **kwargs):
+    def _repr_mimebundle_(
+        self, include: Iterable[str] = (), exclude: Iterable[str] = (), **kwargs: Any
+    ) -> dict[str, Any]:
         data = {
             MIMETypes.APPLICATION_VND_NEPTYNE_ERROR_V1_JSON.value: {
                 f.name: getattr(self, f.name) for f in fields(self)
@@ -86,13 +88,19 @@ class SpreadsheetError:
             data = {k: v for (k, v) in data.items() if k not in exclude}
         return data
 
-    def with_message(self, msg, traceback=None, line_number=None):
+    def with_message(
+        self, msg: str, traceback: list | None = None, line_number: int | None = None
+    ) -> "SpreadsheetError":
         return replace(self, msg=msg, traceback=traceback, line_number=line_number)
 
     @classmethod
     def from_python_exception(
-        cls, etype, evalue, traceback, line_number: int | None = None
-    ):
+        cls,
+        etype: type | None,
+        evalue: Any,
+        traceback: list,
+        line_number: int | None = None,
+    ) -> "SpreadsheetError":
         if etype == TypeError and (m := parse_unsupported_type_exception(str(evalue))):
 
             def normalize_type(t: str) -> str:
@@ -134,46 +142,46 @@ class SpreadsheetError:
     def from_mime_type(cls, bundle: dict[str, Any]) -> "SpreadsheetError":
         return cls(**bundle)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return isinstance(other, SpreadsheetError) and other.ename == self.ename
 
-    def __add__(self, other):
+    def __add__(self, other: Any) -> "SpreadsheetError":
         return self
 
-    def __radd__(self, other):
+    def __radd__(self, other: Any) -> "SpreadsheetError":
         return self
 
-    def __sub__(self, other):
+    def __sub__(self, other: Any) -> "SpreadsheetError":
         return self
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: Any) -> "SpreadsheetError":
         return self
 
-    def __mul__(self, other):
+    def __mul__(self, other: Any) -> "SpreadsheetError":
         return self
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: Any) -> "SpreadsheetError":
         return self
 
-    def __floordiv__(self, other):
+    def __floordiv__(self, other: Any) -> "SpreadsheetError":
         return self
 
-    def __rfloordiv__(self, other):
+    def __rfloordiv__(self, other: Any) -> "SpreadsheetError":
         return self
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: Any) -> "SpreadsheetError":
         return self
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other: Any) -> "SpreadsheetError":
         return self
 
-    def __str__(self):
+    def __str__(self) -> str:
         res = self.ename
         if self.msg:
             res += ": " + self.msg
         return res
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.ename)
 
 

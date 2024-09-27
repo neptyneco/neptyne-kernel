@@ -1,6 +1,8 @@
 import pytest
 
 from ..cell_range import CellRange
+from ..spreadsheet_datetime import SpreadsheetDate
+from ..spreadsheet_error import NA_ERROR, NULL_ERROR, REF_ERROR, VALUE_ERROR
 from .boolean import FALSE, TRUE
 from .information import (
     CELL,
@@ -19,8 +21,6 @@ from .information import (
     TYPE,
     N,
 )
-from ..spreadsheet_datetime import SpreadsheetDate
-from ..spreadsheet_error import NA_ERROR, NULL_ERROR, REF_ERROR, VALUE_ERROR
 
 
 @pytest.mark.parametrize(

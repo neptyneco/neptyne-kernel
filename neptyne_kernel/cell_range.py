@@ -42,11 +42,12 @@ from .primitives import Empty, NeptyneFloat, NeptyneInt, unproxy_val
 from .transformation import Transformation, is_insert_delete_unbounded
 
 if TYPE_CHECKING:
+    from geopandas import GeoDataFrame
+
     from .dash import Dash
     from .dash_ref import DashRef
     from .formulas.helpers import SimpleCellValue
     from .gsheets_api import GSheetRef
-    from geopandas import GeoDataFrame
 
 
 T = TypeVar("T")

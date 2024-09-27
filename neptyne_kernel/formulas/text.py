@@ -6,6 +6,7 @@ import jaconv
 from bahttext import bahttext
 
 from ..cell_range import CellRange
+from ..spreadsheet_error import VALUE_ERROR, SpreadsheetError
 from .boolean import FALSE, BooleanValue
 from .date_time import SpreadsheetDate, SpreadsheetDateTime, SpreadsheetTime
 from .helpers import (
@@ -17,7 +18,6 @@ from .helpers import (
     round_to_decimals,
     to_number,
 )
-from ..spreadsheet_error import VALUE_ERROR, SpreadsheetError
 from .text_formatter import formatter
 
 __all__ = [

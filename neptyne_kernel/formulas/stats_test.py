@@ -2,10 +2,10 @@
 import pytest
 
 from ..cell_range import CellRange
-from .boolean import *  # noqa: F403
-from .helpers import assert_equal, cellrange2np
 from ..spreadsheet_datetime import *  # noqa: F403
 from ..spreadsheet_error import *  # noqa: F403
+from .boolean import *  # noqa: F403
+from .helpers import assert_equal, cellrange2np
 from .stats import *  # noqa: F403
 
 

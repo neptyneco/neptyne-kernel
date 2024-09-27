@@ -3,6 +3,16 @@ from datetime import date, time
 import pytest
 
 from ..cell_range import CellRange
+from ..spreadsheet_datetime import (
+    SpreadsheetDate,
+    SpreadsheetDateTime,
+    SpreadsheetTime,
+    datetime,
+    excel2date,
+    excel2datetime,
+    timedelta,
+)
+from ..spreadsheet_error import NUM_ERROR, VALUE_ERROR
 from .boolean import FALSE, TRUE
 from .date_time import (
     DATE,
@@ -29,16 +39,6 @@ from .date_time import (
     YEAR,
     YEARFRAC,
 )
-from ..spreadsheet_datetime import (
-    SpreadsheetDate,
-    SpreadsheetDateTime,
-    SpreadsheetTime,
-    datetime,
-    excel2date,
-    excel2datetime,
-    timedelta,
-)
-from ..spreadsheet_error import NUM_ERROR, VALUE_ERROR
 
 WORKDAY_INTL_RANGE = CellRange(
     [

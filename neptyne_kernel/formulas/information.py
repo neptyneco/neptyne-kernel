@@ -2,8 +2,6 @@ from inspect import stack
 
 from ..cell_address import format_cell
 from ..cell_range import CellRange, CellRangeList, CellRangeRef
-from .boolean import BooleanValue
-from .helpers import CellValue, Numeric, SimpleCellValue
 from ..spreadsheet_datetime import SpreadsheetDate, SpreadsheetDateTime, SpreadsheetTime
 from ..spreadsheet_error import (
     GETTING_DATA_ERROR,
@@ -16,6 +14,8 @@ from ..spreadsheet_error import (
     ZERO_DIV_ERROR,
     SpreadsheetError,
 )
+from .boolean import BooleanValue
+from .helpers import CellValue, Numeric, SimpleCellValue
 
 __all__ = [
     "CELL",

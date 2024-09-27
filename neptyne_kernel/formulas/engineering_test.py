@@ -1,6 +1,7 @@
 import pytest
 
 from ..cell_range import CellRange
+from ..spreadsheet_error import NA_ERROR, NUM_ERROR, VALUE_ERROR
 from .engineering import (
     BESSELI,
     BESSELJ,
@@ -56,7 +57,6 @@ from .engineering import (
     OCT2HEX,
     str2complex,
 )
-from ..spreadsheet_error import NA_ERROR, NUM_ERROR, VALUE_ERROR
 from .test_helpers import approx_or_error
 
 

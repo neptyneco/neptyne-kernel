@@ -1,4 +1,4 @@
-def init_notebook(api_key: str = "", api_host="https://app.neptyne.com") -> None:
+def init_notebook(api_key: str = "", api_host: str = "https://app.neptyne.com") -> None:
     import os
 
     from IPython import get_ipython

@@ -39,6 +39,7 @@ from urllib.parse import urlparse
 
 import dateutil.parser
 import dateutil.tz
+import ipykernel
 import numpy as np
 import pandas as pd
 import plotly.io as pio
@@ -84,12 +85,6 @@ from .expression_compiler import (
     tokenize_with_ranges,
     try_parse_capitalized_range,
 )
-from .spreadsheet_datetime import SpreadsheetDateTimeBase
-from .spreadsheet_error import (
-    PYTHON_ERROR,
-    SheetDoesNotExist,
-    SpreadsheetError,
-)
 from .get_ipython_mockable import get_ipython_mockable
 from .gsheets_api import (
     GSheetNamedRanges,
@@ -99,6 +94,7 @@ from .gsheets_api import (
     replace_refs,
 )
 from .insert_delete_helper import add_delete_cells_helper
+from .json_tools import json_clean
 from .kernel_runtime import get_kernel, send_sync_request
 from .linter import TyneCachingCompiler
 from .mime_handling import (
@@ -157,6 +153,12 @@ from .proxied_apis import get_api_error_service, start_api_proxying
 from .renderers import InlineWrapper, WithSourceMixin
 from .session_info import NeptyneSessionInfo
 from .sheet_api import NeptyneSheetCollection
+from .spreadsheet_datetime import SpreadsheetDateTimeBase
+from .spreadsheet_error import (
+    PYTHON_ERROR,
+    SheetDoesNotExist,
+    SpreadsheetError,
+)
 from .transformation import (
     Transformation,
     insert_delete_content_to_sheet_transform,
@@ -196,16 +198,13 @@ from .widgets.register_widget import (
     widget_name_from_code,
     widget_registry,
 )
-from .json_tools import json_clean
-
-import ipykernel
 
 IPYKERNEL_MAJOR_VERSION = int(ipykernel.__version__.split(".")[0])
 
 try:
     from .formulas.sheets import SvgImage
 except ImportError:
-    SvgImage = None
+    SvgImage = None  # type: ignore
 
 try:
     from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
@@ -249,7 +248,7 @@ CLEAR_CELL_METADATA_CHANGE = "clear_cell_metadata_change"
 pio.templates.default = "plotly"
 
 
-def get_parent_shim(self: Kernel, channel: str | None = None):
+def get_parent_shim(self: Kernel, channel: str | None = None) -> dict:
     return self._parent_header
 
 
@@ -531,7 +530,7 @@ class Dash:
                 ip.SyntaxTB = DashSyntaxTB(color_scheme="LightBG", parent=parent)
 
             try:
-                import matplotlib
+                import matplotlib  # noqa: F401
 
                 ip.run_line_magic("matplotlib", "inline")
             except ImportError:
@@ -876,6 +875,8 @@ class Dash:
         )
 
     def undo_msg(self, msg_type: MessageTypes, payload: dict) -> dict[str, Any]:
+        if not self.kernel.session:
+            return {}
         msg = self.kernel.session.msg(msg_type.value, payload)
         parent_header = self.shell.parent_header["header"]
         msg["header"]["msg_id"] = parent_header["msg_id"]
@@ -959,13 +960,14 @@ class Dash:
     def broadcast_init_stage(self, state: KernelInitState) -> None:
         parent = self.kernel.get_parent("shell")
         parent["header"]["init_phase"] = state.value
-        self.kernel.session.send(
-            self.kernel.iopub_socket,
-            "status",
-            {"execution_state": "busy"},
-            parent=parent,
-            ident=f"kernel.{self.kernel.ident}.status".encode(),
-        )
+        if self.kernel.session:
+            self.kernel.session.send(
+                self.kernel.iopub_socket,
+                "status",
+                {"execution_state": "busy"},
+                parent=parent,
+                ident=f"kernel.{self.kernel.ident}.status".encode(),
+            )
 
     def pip_install(self, requirements_txt: str, silent: bool = False) -> None:
         neptyne_pip_install(requirements_txt, silent=silent)

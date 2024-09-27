@@ -1,6 +1,7 @@
 import pytest
 
 from ..cell_range import CellRange
+from ..spreadsheet_error import NUM_ERROR, VALUE_ERROR
 from .database import (
     DAVERAGE,
     DCOUNT,
@@ -15,7 +16,6 @@ from .database import (
     DVAR,
     DVARP,
 )
-from ..spreadsheet_error import NUM_ERROR, VALUE_ERROR
 from .test_helpers import approx_or_error
 
 DAVERAGE_RANGE = CellRange(

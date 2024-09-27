@@ -94,14 +94,7 @@ class TyneInitializationData:
         globals_module = "gsheets" if self.in_gs_mode else "core"
         yield (
             "",
-            "\n".join(  # TODO: FIX THIS
-                (
-                    "try:",
-                    f"    from neptyne_kernel.kernel_globals.{globals_module} import *",
-                    "except ModuleNotFoundError:",
-                    f"    from neptyne_kernel.kernel_globals.{globals_module} import *",
-                )
-            ),
+            f"from neptyne_kernel.kernel_globals.{globals_module} import *",
         )
 
         if self.code_panel_code:

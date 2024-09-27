@@ -1,8 +1,8 @@
 # ruff: noqa: F405
 import pytest
 
-from .boolean import *  # noqa: F403
 from ..spreadsheet_error import NA_ERROR, NULL_ERROR
+from .boolean import *  # noqa: F403
 
 
 def test_IF():

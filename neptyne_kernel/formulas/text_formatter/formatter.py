@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from math import floor, log10
 from typing import Any
 
-from ..helpers import round_half_up
 from ...spreadsheet_datetime import excel2datetime
+from ..helpers import round_half_up
 from .decimal_section import DecimalSection
 from .evaluator import get_section
 from .number_format import NumberFormat

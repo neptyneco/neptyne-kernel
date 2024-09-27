@@ -1,7 +1,6 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Sequence
 
-
 from .cell_address import Address
 from .ops import ClearOp, ExecOp
 
@@ -16,8 +15,8 @@ class CellExecutionGraph:
         cell_ids: set[Address],
         pre_clear: Sequence[Address] | None,
     ) -> None:
-        from graphlib import CycleError, TopologicalSorter
         import networkx as nx
+        from graphlib import CycleError, TopologicalSorter
 
         self.dash = dash
         self.cell_ids = cell_ids
