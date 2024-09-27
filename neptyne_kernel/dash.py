@@ -199,6 +199,7 @@ from .widgets.register_widget import (
 from .json_tools import json_clean
 
 import ipykernel
+import websockets
 
 IPYKERNEL_MAJOR_VERSION = int(ipykernel.__version__.split(".")[0])
 
@@ -1541,6 +1542,41 @@ class Dash:
         gsheet_id = payload["gsheet_id"]
         return api_token, gsheet_id
 
+    async def listen_for_py_executes(self, api_host: str, api_key: str) -> None:
+        try:
+            parsed = urlparse(api_host)
+            shard_url = f"{parsed.scheme}://{parsed.hostname}/api/nks/how_many_shards?api_key={api_key}"
+            payload = requests.get(shard_url).json()
+            shard_index = payload.get("shard_index", 0)
+            websocket_protocol = "wss" if parsed.scheme == "https" else "ws"
+            websocket_url = f"{websocket_protocol}://{parsed.hostname}/ws/{shard_index}/nks/runpy/{api_key}"
+            async with websockets.connect(websocket_url) as websocket:
+                while True:
+                    message = await websocket.recv()
+                    data = json.loads(message)
+
+                    if data.get("action") == "run":
+                        token = data['token']
+                        code = data["code"]
+                        if code:
+                            try:
+                                value = eval(
+                                    code, self.shell.user_global_ns, self.shell.user_ns
+                                )
+                                if callable(value):
+                                    value = value()
+                            except Exception:
+                                etype, evalue, tb = sys.exc_info()
+                                value = gsheet_spreadsheet_error_from_python_exception(
+                                    etype, evalue, tb
+                                )
+                        _content_type, encoded = encode_for_gsheets(value)
+                        payload = {"result": json.loads(encoded), "token": token}
+                        await websocket.send(json.dumps(payload))
+
+        except Exception as e:
+            self.py_error = e
+
     def initialize_local_kernel(self, api_key: str, api_host: str) -> None:
         if self.initialized:
             print(
@@ -1552,6 +1588,7 @@ class Dash:
             return
         self.api_key = api_key
         self.api_host = api_host
+        self.py_error = None
 
         api_host_host = urlparse(api_host).hostname
         if api_host_host != "localhost":
@@ -1577,6 +1614,9 @@ class Dash:
                 requires_recompile=False,
             )
         )
+        loop = asyncio.get_running_loop()
+        loop.create_task(self.listen_for_py_executes(api_host, api_key))
+
         self.initialized = True
 
         print("Connected to Google Sheet:")

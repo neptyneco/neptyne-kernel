@@ -16,3 +16,4 @@ pyjwt
 stack-data
 tokenize_rt
 untokenize
+websockets

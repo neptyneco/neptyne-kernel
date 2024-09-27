@@ -668,7 +668,9 @@ sqlalchemy==2.0.35
 sqlmodel==0.0.22
     # via reflex
 stack-data==0.6.3
-    # via ipython
+    # via
+    #   -r requirements.in
+    #   ipython
 starlette==0.37.2
     # via
     #   fastapi
@@ -759,7 +761,9 @@ wcwidth==0.2.13
 webencodings==0.5.1
     # via html5lib
 websockets==13.0.1
-    # via reflex-hosting-cli
+    # via
+    #   -r requirements.in
+    #   reflex-hosting-cli
 wheel==0.44.0
     # via reflex
 wrapt==1.16.0
