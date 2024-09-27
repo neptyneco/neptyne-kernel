@@ -1545,8 +1545,11 @@ class Dash:
     async def listen_for_py_executes(self, api_host: str, api_key: str) -> None:
         try:
             parsed = urlparse(api_host)
+            shard_url = f"{parsed.scheme}://{parsed.hostname}/api/nks/how_many_shards?api_key={api_key}"
+            payload = requests.get(shard_url).json()
+            shard_index = payload.get("shard_index", 0)
             websocket_protocol = "wss" if parsed.scheme == "https" else "ws"
-            websocket_url = f"{websocket_protocol}://{parsed.hostname}/ws/0/nks/runpy/{api_key}"
+            websocket_url = f"{websocket_protocol}://{parsed.hostname}/ws/{shard_index}/nks/runpy/{api_key}"
             async with websockets.connect(websocket_url) as websocket:
                 while True:
                     message = await websocket.recv()
