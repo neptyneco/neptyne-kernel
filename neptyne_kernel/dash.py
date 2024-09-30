@@ -481,6 +481,8 @@ class Dash:
     _cell_execution_stack: list[Address]
     local_repl_mode: bool = False
 
+    py_error: tuple[int, Exception] | None = None
+
     def __init__(self, silent: bool = False) -> None:
         if Dash._instance is not None:
             raise RuntimeError("Dash is a singleton")
@@ -1543,44 +1545,51 @@ class Dash:
         return api_token, gsheet_id
 
     async def listen_for_py_executes(self, api_host: str, api_key: str) -> None:
-        try:
-            parsed = urlparse(api_host)
-            shard_url = f"{parsed.scheme}://{parsed.hostname}/api/nks/how_many_shards?api_key={api_key}"
-            payload = requests.get(shard_url).json()
-            shard_index = payload.get("shard_index", 0)
-            websocket_protocol = "wss" if parsed.scheme == "https" else "ws"
-            websocket_url = f"{websocket_protocol}://{parsed.hostname}/ws/{shard_index}/nks/runpy/{api_key}"
-            phase = 0
-            async with websockets.connect(websocket_url) as websocket:
-                while True:
-                    phase = 1
-                    message = await websocket.recv()
-                    phase = 2
-                    data = json.loads(message)
+        parsed = urlparse(api_host)
+        shard_url = f"{parsed.scheme}://{parsed.hostname}/api/nks/how_many_shards?api_key={api_key}"
+        payload = requests.get(shard_url).json()
+        shard_index = payload.get("shard_index", 0)
+        websocket_protocol = "wss" if parsed.scheme == "https" else "ws"
+        websocket_url = f"{websocket_protocol}://{parsed.hostname}/ws/{shard_index}/nks/runpy/{api_key}"
+        phase = 0
+        retries = 0
+        while retries < 4:
+            try:
+                if retries > 0:
+                    print("Retrying connection...", retries)
+                async with websockets.connect(websocket_url) as websocket:
+                    while True:
+                        phase = 1
+                        message = await websocket.recv()
+                        phase = 2
+                        data = json.loads(message)
 
-                    if data.get("action") == "run":
-                        token = data['token']
-                        code = data["code"]
-                        if code:
-                            try:
-                                value = eval(
-                                    code, self.shell.user_global_ns, self.shell.user_ns
-                                )
-                                if callable(value):
-                                    value = value()
-                            except Exception:
-                                etype, evalue, tb = sys.exc_info()
-                                value = gsheet_spreadsheet_error_from_python_exception(
-                                    etype, evalue, tb
-                                )
-                        _content_type, encoded = encode_for_gsheets(value)
-                        payload = {"result": json.loads(encoded), "token": token}
-                        phase = 3
-                        await websocket.send(json.dumps(payload))
-                        phase = 4
+                        if data.get("action") == "run":
+                            token = data['token']
+                            code = data["code"]
+                            if code:
+                                try:
+                                    value = eval(
+                                        code, self.shell.user_global_ns, self.shell.user_ns
+                                    )
+                                    if callable(value):
+                                        value = value()
+                                except Exception:
+                                    etype, evalue, tb = sys.exc_info()
+                                    value = gsheet_spreadsheet_error_from_python_exception(
+                                        etype, evalue, tb
+                                    )
+                            _content_type, encoded = encode_for_gsheets(value)
+                            payload = {"result": json.loads(encoded), "token": token}
+                            phase = 3
+                            await websocket.send(json.dumps(payload))
+                            phase = 4
+            except websockets.ConnectionClosed:
+                retries += 1
+                time.sleep(2 ** retries)
 
-        except Exception as e:
-            self.py_error = (phase, e)
+            except Exception as e:
+                self.py_error = (phase, e)
 
     def initialize_local_kernel(self, api_key: str, api_host: str) -> None:
         if self.initialized:
