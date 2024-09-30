@@ -1550,9 +1550,12 @@ class Dash:
             shard_index = payload.get("shard_index", 0)
             websocket_protocol = "wss" if parsed.scheme == "https" else "ws"
             websocket_url = f"{websocket_protocol}://{parsed.hostname}/ws/{shard_index}/nks/runpy/{api_key}"
+            phase = 0
             async with websockets.connect(websocket_url) as websocket:
                 while True:
+                    phase = 1
                     message = await websocket.recv()
+                    phase = 2
                     data = json.loads(message)
 
                     if data.get("action") == "run":
@@ -1572,10 +1575,12 @@ class Dash:
                                 )
                         _content_type, encoded = encode_for_gsheets(value)
                         payload = {"result": json.loads(encoded), "token": token}
+                        phase = 3
                         await websocket.send(json.dumps(payload))
+                        phase = 4
 
         except Exception as e:
-            self.py_error = e
+            self.py_error = (phase, e)
 
     def initialize_local_kernel(self, api_key: str, api_host: str) -> None:
         if self.initialized:
