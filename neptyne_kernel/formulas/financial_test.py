@@ -3,6 +3,7 @@ from datetime import date, datetime
 import pytest
 
 from ..cell_range import CellRange
+from ..spreadsheet_datetime import SpreadsheetDate
 from .boolean import FALSE, TRUE
 from .date_time import DATE
 from .financial import (
@@ -62,7 +63,6 @@ from .financial import (
     YIELDDISC,
     YIELDMAT,
 )
-from ..spreadsheet_datetime import SpreadsheetDate
 
 
 @pytest.mark.parametrize(

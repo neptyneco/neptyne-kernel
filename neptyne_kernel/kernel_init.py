@@ -1,3 +1,5 @@
+import warnings
+
 from IPython.core import interactiveshell as _interactiveshell
 from jedi.api import Interpreter as _jedi_Interpreter
 from stack_data.core import Source as _Source
@@ -21,5 +23,17 @@ def _fix_jedi_interpreter_getattr():
         pass
 
 
+def _suppress_tqdm_warnings():
+    try:
+        from tqdm import TqdmWarning
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=TqdmWarning)
+            import tqdm.auto as _tqdm_auto  # noqa: F401
+    except ImportError:
+        pass
+
+
 _prime_source_cache()
 _fix_jedi_interpreter_getattr()
+_suppress_tqdm_warnings()

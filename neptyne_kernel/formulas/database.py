@@ -4,8 +4,8 @@ from operator import __mul__
 from statistics import StatisticsError, mean, pstdev, pvariance, stdev, variance
 
 from ..cell_range import CellRange
-from .helpers import Numeric, SimpleCellValue, criteria_func, parse_criteria
 from ..spreadsheet_error import NUM_ERROR, VALUE_ERROR
+from .helpers import Numeric, SimpleCellValue, criteria_func, parse_criteria
 
 DBField = int | str
 

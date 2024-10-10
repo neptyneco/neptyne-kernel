@@ -25,12 +25,12 @@ from .cell_api import CellApiMixin
 from .cell_range import CellRange, IntOrSlice, slice_or_int_to_range
 from .dash_traceback import CoordinateTuple
 from .datetime_conversions import datetime_to_serial
-from .spreadsheet_datetime import excel2datetime
 from .kernel_runtime import get_api_token
 from .neptyne_protocol import CellAttribute, Dimension, SheetTransform
 from .primitives import proxy_val
 from .proxied_apis import NEEDS_GSHEET_ADVANCED_FEATURES_HTTP_CODE, TOKEN_HEADER_NAME
-from .spreadsheet_error import GSheetError, GSheetNotAuthorized
+from .spreadsheet_datetime import excel2datetime
+from .spreadsheet_error import GSheetError, GSheetNotAuthorized, SpreadsheetError
 from .util import list_like
 from .widgets.color import Color
 
@@ -331,15 +331,22 @@ def get_item(
 def values_for_result(result: dict[str, Any]) -> list[list[Any]]:
     values = []
 
-    def cell_to_value(cell: dict[str, Any]) -> float | str | int | None:
+    def cell_to_value(
+        cell: dict[str, Any],
+    ) -> SpreadsheetError | float | str | int | None:
         value = cell.get("effectiveValue")
         if value is not None:
-            value = next(iter(value.values()))
+            if error_value := value.get("errorValue"):
+                return SpreadsheetError(
+                    "#" + error_value.get("type"), error_value.get("message")
+                )
             cell_format = (
                 cell.get("effectiveFormat", {}).get("numberFormat", {}).get("type")
             )
-            if cell_format == "DATE_TIME" or cell_format == "DATE":
-                value = excel2datetime(value)
+            if isinstance(value, Mapping) and value:
+                value = next(iter(value.values()))
+                if cell_format == "DATE_TIME" or cell_format == "DATE":
+                    value = excel2datetime(value)
         return value
 
     if result["sheets"]:

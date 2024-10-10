@@ -1,8 +1,10 @@
 altair
 anthropic
+bahttext
 black
 bokeh
-bs4
+beautifulsoup4
+calweek
 croniter
 db-dtypes
 descartes
@@ -11,6 +13,8 @@ geopy
 google-generativeai
 graphlib
 html5lib
+isoweek
+jaconv
 json-fix
 mapboxgl
 mapclassify
@@ -20,13 +24,15 @@ networkx
 openai
 openpyxl
 orjson
+pyxirr>=0.10.5
 qrcode
-reflex
+roman
 scikit-learn
 scipy
 seaborn
+statsmodels
 tweepy
-streamlit~=1.36.0
+streamlit>=1.36.0
 folium # ** geo.py
 feedparser # ** data.py
 geodatasets # ** geo.py

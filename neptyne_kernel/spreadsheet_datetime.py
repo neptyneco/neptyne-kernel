@@ -68,7 +68,7 @@ class SpreadsheetDateTimeBase(CellApiMixin):
         cls,
         value: int | float | datetime | date | time | str | None = None,
         ref: Optional["DashRef"] = None,
-    ):
+    ) -> "SpreadsheetDateTimeBase":
         if cls is SpreadsheetDateTimeBase:
             raise TypeError(f"Only children of '{cls.__name__}' may be instantiated")
         if isinstance(value, int | float):
@@ -82,18 +82,18 @@ class SpreadsheetDateTimeBase(CellApiMixin):
                 dt = datetime.now(tz=cls.TZ_INFO)
             else:
                 raise ValueError(f"Unsupported type '{value.__class__.__name__}'")
-            _value = cls.serial(dt)
-        x = cls.__bases__[1].__new__(cls, _value)
-        x.ref = ref
-        return x
+            _value = cls.serial(dt)  # type: ignore
+        x = cls.__bases__[1].__new__(cls, _value)  # type: ignore
+        x.ref = ref  # type: ignore
+        return x  # type: ignore
 
-    def __copy__(self):
+    def __copy__(self) -> "SpreadsheetDateTimeBase":
         return self
 
-    def __deepcopy__(self, memo: Any):
+    def __deepcopy__(self, memo: Any) -> "SpreadsheetDateTimeBase":
         return self
 
-    def apply_operator(self, other: Any, op: Callable):
+    def apply_operator(self, other: Any, op: Callable) -> Any:
         try:
             num_type = self.__class__.__bases__[1]
             if isinstance(other, Empty):
@@ -104,16 +104,16 @@ class SpreadsheetDateTimeBase(CellApiMixin):
             return VALUE_ERROR
         return op(left, right)
 
-    def __add__(self, other: Any):
+    def __add__(self, other: Any) -> Any:
         return self.apply_operator(other, __add__)
 
-    def __radd__(self, other: Any):
+    def __radd__(self, other: Any) -> Any:
         return self.__add__(other)
 
-    def __sub__(self, other: Any):
+    def __sub__(self, other: Any) -> Any:
         return self.apply_operator(other, __sub__)
 
-    def __rsub__(self, other: Any):
+    def __rsub__(self, other: Any) -> Any:
         return -self.__sub__(other)
 
 
@@ -150,7 +150,7 @@ class SpreadsheetDate(SpreadsheetDateTimeBase, int):
     @staticmethod
     def serial(dt: time | datetime) -> int:
         if isinstance(dt, datetime):
-            dt = dt.date()
-        return (dt - date(EPOCH_FIRST_YEAR - 1, 12, 31)).days + correct_number_of_days(
-            dt
+            dt = dt.date()  # type: ignore
+        return (dt - date(EPOCH_FIRST_YEAR - 1, 12, 31)).days + correct_number_of_days(  # type: ignore
+            dt  # type: ignore
         )

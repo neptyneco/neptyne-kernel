@@ -42,11 +42,12 @@ from .primitives import Empty, NeptyneFloat, NeptyneInt, unproxy_val
 from .transformation import Transformation, is_insert_delete_unbounded
 
 if TYPE_CHECKING:
+    from geopandas import GeoDataFrame
+
     from .dash import Dash
     from .dash_ref import DashRef
     from .formulas.helpers import SimpleCellValue
     from .gsheets_api import GSheetRef
-    from geopandas import GeoDataFrame
 
 
 T = TypeVar("T")
@@ -850,9 +851,15 @@ class CellRangeRef(CellRange, CellApiMixin):
         self.ref.setitem(key, value)
 
     def __iter__(self) -> Iterator:
-        from .dash_ref import DashRef
+        from .gsheets_api import GSheetRef
 
-        assert isinstance(self.ref, DashRef)
+        if isinstance(self.ref, GSheetRef):
+            # self.ref can be a GSheetRef in case of sheets. That's broken there but hard to fix.
+            # We can however cheaply create the right cell range here and let that do the work.
+            gsheet_range = CellRangeGSheet(self.ref)
+            yield from gsheet_range
+            return
+
         # if we have -1 in the range, loop through it even if it is one dimensional:
         max_col, max_row = self.ref.current_max_col_row()
         if max_row == -1 or max_col == -1:

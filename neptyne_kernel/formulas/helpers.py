@@ -10,7 +10,6 @@ import roman
 
 from ..cell_range import CellRange
 from ..primitives import check_none
-from .boolean import BooleanValue
 from ..spreadsheet_datetime import SpreadsheetDateTime
 from ..spreadsheet_error import (
     NA_ERROR,
@@ -19,6 +18,7 @@ from ..spreadsheet_error import (
     ZERO_DIV_ERROR,
     SpreadsheetError,
 )
+from .boolean import BooleanValue
 
 Numeric = int | float
 Matrix = list | CellRange

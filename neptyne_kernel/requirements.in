@@ -5,9 +5,10 @@ ipykernel
 ipython
 jupyter_client
 libcst
+nbformat
 numpy
 pandas
-Pillow
+Pillow~=9.4.0
 plotly
 pydeck
 pygments

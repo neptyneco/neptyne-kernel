@@ -21,7 +21,6 @@ from plotly.basedatatypes import BaseFigure
 from .cell_address import CoordAddr
 from .datetime_conversions import datetime_to_serial
 from .download import Download
-from .spreadsheet_error import SpreadsheetError
 from .mime_types import (
     BYTES_MIME_KEY,
     DATETIME_KEY,
@@ -36,6 +35,7 @@ from .mime_types import (
 from .neptyne_protocol import MIMETypes
 from .pandas_unrolling import dataframe_to_grid
 from .primitives import Empty
+from .spreadsheet_error import SpreadsheetError
 from .widgets import base_widget
 from .widgets.output_widgets import PLOTLY_MIME_TYPE
 

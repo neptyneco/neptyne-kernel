@@ -97,7 +97,7 @@ class Checkbox(BaseWidget, ColorMixins):
 
 
 @register_widget(category="Input")
-class Autocomplete(BaseWidget):
+class Autocomplete(BaseWidget, ColorMixins):
     """Pick from a long list by typing"""
 
     choices: list[str] | Callable[[str], list[str]] = widget_field(

@@ -29,8 +29,8 @@ from .cell_address import (
     replace_negative_bounds_with_grid_size,
 )
 from .formula_names import FORMULA_NAMES
-from .spreadsheet_error import SheetDoesNotExist
 from .neptyne_protocol import Dimension, WidgetRegistry
+from .spreadsheet_error import SheetDoesNotExist
 from .transformation import Transformation
 
 N_RE = re.compile(r"N_[ \t]*\[(?P<addr>\-?\d+(?:[ \t]*,[ \t]*((\-?\d+)|\'\w+\'))+)\]")

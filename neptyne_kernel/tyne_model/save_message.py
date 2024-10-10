@@ -4,7 +4,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
 
-
 from ..cell_address import Address
 from ..primitives import Empty
 from ..sheet_api import NeptyneSheetCollection

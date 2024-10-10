@@ -7,7 +7,6 @@ from typing import Callable, Iterable
 from dateutil.parser import ParserError
 from dateutil.relativedelta import relativedelta
 
-from .helpers import Numeric, _flatten_range
 from ..spreadsheet_datetime import (
     SpreadsheetDate,
     SpreadsheetDateTime,
@@ -15,6 +14,7 @@ from ..spreadsheet_datetime import (
     excel2datetime,
 )
 from ..spreadsheet_error import VALUE_ERROR, SpreadsheetError
+from .helpers import Numeric, _flatten_range
 
 BaseType = int | float | str
 DateTimeValue = BaseType | SpreadsheetDateTime

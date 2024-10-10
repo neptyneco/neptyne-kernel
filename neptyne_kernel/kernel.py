@@ -45,7 +45,8 @@ class Kernel(IPythonKernel):
 
     def start(self) -> None:
         super().start()
-        self.shell.run_cell("from neptyne_kernel.kernel_init import *")
+        if self.shell:
+            self.shell.run_cell("from neptyne_kernel.kernel_init import *")
 
     async def do_execute(
         self,

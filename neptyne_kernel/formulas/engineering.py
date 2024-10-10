@@ -7,8 +7,8 @@ from operator import add, and_, lshift, mul, or_, pow, rshift, sub, truediv, xor
 from scipy.special import iv, jv, kn, yn
 
 from ..cell_range import CellRange
-from .helpers import Numeric, _flatten_range
 from ..spreadsheet_error import NA_ERROR, NUM_ERROR, VALUE_ERROR, SpreadsheetError
+from .helpers import Numeric, _flatten_range
 
 __all__ = [
     "BESSELI",
