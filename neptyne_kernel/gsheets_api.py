@@ -340,12 +340,13 @@ def values_for_result(result: dict[str, Any]) -> list[list[Any]]:
                 return SpreadsheetError(
                     "#" + error_value.get("type"), error_value.get("message")
                 )
-            value = next(iter(value.values()))
             cell_format = (
                 cell.get("effectiveFormat", {}).get("numberFormat", {}).get("type")
             )
-            if cell_format == "DATE_TIME" or cell_format == "DATE":
-                value = excel2datetime(value)
+            if isinstance(value, Mapping) and value:
+                value = next(iter(value.values()))
+                if cell_format == "DATE_TIME" or cell_format == "DATE":
+                    value = excel2datetime(value)
         return value
 
     if result["sheets"]:
