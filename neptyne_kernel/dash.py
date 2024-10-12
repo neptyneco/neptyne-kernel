@@ -1557,6 +1557,8 @@ class Dash:
 
         api_host_host = urlparse(api_host).hostname
         if api_host_host != "localhost":
+            if api_host_host == "app.neptyne.com":
+                api_host_host = "neptyne.com"
             os.environ["API_PROXY_HOST_PORT"] = f"api-proxy.{api_host_host}"
 
         api_token, gsheet_id = self.get_api_token()

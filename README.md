@@ -28,19 +28,13 @@ import neptyne_kernel.neptyne_api as nt
 
 ### Local Kernels + Google Sheets
 
-You can configure the Neptyne kernel to run in a Jupyter notebook, and connect it to a Google sheet. To do so, first install the Neptyne kernel spec:
+You can use the Neptyne kernel to run in a Jupyter notebook, and connect it to a Google sheet. To do so, first get an API key from your Neptyne Google sheets extension. In the extension menu, open 'Manage Advanced Features', and enable the API. Copy your API key, and put in your notebook cell:
 
-```shell
-neptyne_kernel_spec=$(python -c 'import neptyne_kernel, pathlib; print(pathlib.Path(neptyne_kernel.__file__).parent / "kernel_spec" / "neptyne")')
-jupyter kernelspec install $neptyne_kernel_spec
-```
-
-Then, in a Jupyter notebook, select "Neptyne" as your kernel type. After obtaining an API key from a Google Sheet using the Neptyne extension, you can connect your notebook to your sheet using:
 
 ```python
-import neptyne as nt
+import neptyne_kernel
 
-nt.connect_kernel("<api key>")
+neptyne_kernel.init_notebook("<your api key>")
 ```
 
-in your notebook.
+You can now use Neptyne A1-notation in your notebook cells (e.g. `A1 = 1`)
