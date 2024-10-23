@@ -1554,6 +1554,8 @@ class Dash:
         self.api_host = api_host
 
         api_host_host = urlparse(api_host).hostname
+        if api_host_host.startswith("app."):
+            api_host_host = api_host_host[4:]
         if api_host_host != "localhost":
             os.environ["API_PROXY_HOST_PORT"] = f"api-proxy.{api_host_host}"
 
