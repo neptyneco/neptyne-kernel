@@ -1556,6 +1556,8 @@ class Dash:
         self.api_host = api_host
 
         api_host_host = urlparse(api_host).hostname
+        if api_host_host.startswith("app."):
+            api_host_host = api_host_host[4:]
         if api_host_host != "localhost":
             if api_host_host == "app.neptyne.com":
                 api_host_host = "neptyne.com"
